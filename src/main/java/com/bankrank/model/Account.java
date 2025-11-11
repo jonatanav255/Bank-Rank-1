@@ -50,6 +50,9 @@ public class Account {
     }
 
     public boolean withdraw(double amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Amount cannot be 0 or a negative amount");
+        }
 
         if (!AccountType.canWithdraw(Balance, amount)) {
             return false;
