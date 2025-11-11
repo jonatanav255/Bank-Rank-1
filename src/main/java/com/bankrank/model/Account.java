@@ -71,21 +71,11 @@ public class Account {
         return transactionHistory;
     }
 
-    /**
-     * Transfers money from this account to another account atomically. The
-     * transfer only succeeds if all validations pass - otherwise no balances
-     * change.
-     *
-     * @param destinationAccount The account to transfer money to
-     * @param amount The amount to transfer
-     * @return true if transfer succeeded, false otherwise
-     */
     public boolean transferTo(Account destinationAccount, double amount) {
-        // PHASE 1: VALIDATE EVERYTHING (don't change anything yet)
 
         // Validation 1: Amount must be positive
         if (amount <= 0) {
-            return false; // Using boolean instead of exception for business logic
+            return false;
         }
 
         // Validation 2: Destination account must exist and be different
