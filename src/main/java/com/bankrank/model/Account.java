@@ -60,4 +60,48 @@ public class Account {
         Balance -= amount;
         return true;
     }
+
+    /**
+     * Transfers money from this account to another account atomically.
+     * The transfer only succeeds if all validations pass - otherwise no balances change.
+     *
+     * @param destinationAccount The account to transfer money to
+     * @param amount The amount to transfer
+     * @return true if transfer succeeded, false otherwise
+     */
+    public boolean transferTo(Account destinationAccount, double amount) {
+        // PHASE 1: VALIDATE EVERYTHING (don't change anything yet)
+
+        // Validation 1: Amount must be positive
+        if (amount <= 0) {
+            return false; // Using boolean instead of exception for business logic
+        }
+
+        // Validation 2: Destination account must exist and be different
+        if (destinationAccount == null) {
+            return false;
+        }
+
+        // Validation 3: Can't transfer to the same account
+        if (this.AccountNumber.equals(destinationAccount.AccountNumber)) {
+            return false;
+        }
+
+        // Validation 4: Source account must be able to withdraw this amount
+        // This checks both sufficient funds AND minimum balance requirements
+        if (!this.AccountType.canWithdraw(this.Balance, amount)) {
+            return false;
+        }
+
+        // PHASE 2: EXECUTE (all validations passed, safe to proceed)
+        // Note: In Java, an object can access private fields of another instance
+        // of the same class. This is a language feature that maintains encapsulation
+        // while allowing operations between instances.
+
+        this.Balance -= amount;              // Withdraw from source
+        destinationAccount.Balance += amount; // Deposit to destination
+
+        // PHASE 3: RETURN SUCCESS
+        return true;
+    }
 }
