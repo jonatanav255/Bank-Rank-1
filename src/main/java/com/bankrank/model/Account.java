@@ -2,6 +2,8 @@ package com.bankrank.model;
 
 import java.util.UUID;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 // Create new accounts with unique account numbers, customer name, and initial deposit
 // Support two account types: Savings and Checking
@@ -14,6 +16,7 @@ public class Account {
     private double Balance;
     private LocalDate DateCreated;
     private AccountType AccountType;
+    private List<Transaction> transactionHistory;
 
     //constructor
     public Account(UUID AccountNumber, String CustomerName, double InitialValue, AccountType AccountType) {
@@ -22,6 +25,7 @@ public class Account {
         this.Balance = InitialValue;
         this.DateCreated = LocalDate.now();
         this.AccountType = AccountType;
+        this.transactionHistory = new ArrayList<>();
     }
 
     // getters
@@ -61,9 +65,14 @@ public class Account {
         return true;
     }
 
+    public List<Transaction> getTransactionHistory() {
+        return transactionHistory;
+    }
+
     /**
-     * Transfers money from this account to another account atomically.
-     * The transfer only succeeds if all validations pass - otherwise no balances change.
+     * Transfers money from this account to another account atomically. The
+     * transfer only succeeds if all validations pass - otherwise no balances
+     * change.
      *
      * @param destinationAccount The account to transfer money to
      * @param amount The amount to transfer
@@ -97,7 +106,6 @@ public class Account {
         // Note: In Java, an object can access private fields of another instance
         // of the same class. This is a language feature that maintains encapsulation
         // while allowing operations between instances.
-
         this.Balance -= amount;              // Withdraw from source
         destinationAccount.Balance += amount; // Deposit to destination
 
