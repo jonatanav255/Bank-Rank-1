@@ -14,7 +14,7 @@ public class Account {
     private double Balance;
     private LocalDate DateCreated;
 
-    //   constructor
+    //constructor
     public Account(UUID AccountNumber, String CustomerName, double InitialValue) {
         this.AccountNumber = AccountNumber;
         this.CustomerName = CustomerName;
@@ -23,19 +23,27 @@ public class Account {
     }
 
     // getters
-//   Start with this:
-    public double getAccountNumber() {
-        return Balance;
+    public UUID getAccountNumber() {
+        return AccountNumber;
     }
+
     public String getCustomerName() {
         return CustomerName;
     }
-//   Write getter methods for all four fields. Use proper Java naming conventions:
-//   - getAccountNumber()
-//   - getCustomerName()
-//   - getBalance()
-//   - getDateCreated()
-    // setters
-    // methods
-//     balance initial deposit account types - Savings and Checking
+
+    public double getBalance() {
+        return Balance;
+    }
+
+    public LocalDate getDateCreated() {
+        return DateCreated;
+    }
+
+    public void deposit(double amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Amount cannot be 0 or a negative amount");
+        }
+
+        this.Balance = Balance + amount;
+    }
 }
