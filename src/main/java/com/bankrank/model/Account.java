@@ -51,6 +51,8 @@ public class Account {
         }
 
         this.Balance = Balance + amount;
+        Transaction depositTransaction = new Transaction(TransactionType.DEPOSIT, amount, "Deposit of $" + amount);
+        transactionHistory.add(depositTransaction);
     }
 
     public boolean withdraw(double amount) {
@@ -103,13 +105,9 @@ public class Account {
         }
 
         // PHASE 2: EXECUTE (all validations passed, safe to proceed)
-        // Note: In Java, an object can access private fields of another instance
-        // of the same class. This is a language feature that maintains encapsulation
-        // while allowing operations between instances.
-        this.Balance -= amount;              // Withdraw from source
-        destinationAccount.Balance += amount; // Deposit to destination
+        this.Balance -= amount;
+        destinationAccount.Balance += amount;
 
-        // PHASE 3: RETURN SUCCESS
         return true;
     }
 }
