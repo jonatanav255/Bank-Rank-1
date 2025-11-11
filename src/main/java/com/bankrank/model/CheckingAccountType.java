@@ -4,7 +4,7 @@ public class CheckingAccountType implements AccountType {
 
     @Override
     public double getMiniumBalance() {
-        return 100;
+        return 0;
     }
 
     @Override

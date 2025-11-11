@@ -13,13 +13,15 @@ public class Account {
     private String CustomerName;
     private double Balance;
     private LocalDate DateCreated;
+    private AccountType AccountType;
 
     //constructor
-    public Account(UUID AccountNumber, String CustomerName, double InitialValue) {
+    public Account(UUID AccountNumber, String CustomerName, double InitialValue, AccountType AccountType) {
         this.AccountNumber = AccountNumber;
         this.CustomerName = CustomerName;
         this.Balance = InitialValue;
         this.DateCreated = LocalDate.now();
+        this.AccountType = AccountType;
     }
 
     // getters
@@ -45,5 +47,14 @@ public class Account {
         }
 
         this.Balance = Balance + amount;
+    }
+
+    public boolean withdraw(double amount) {
+
+        if (!AccountType.canWithdraw(Balance, amount)) {
+            return false;
+        }
+        Balance -= amount;
+        return true;
     }
 }
