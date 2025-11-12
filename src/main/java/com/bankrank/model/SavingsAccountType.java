@@ -11,4 +11,9 @@ public class SavingsAccountType implements AccountType {
     public boolean canWithdraw(double currentBalance, double withDrawAmount) {
         return (currentBalance - withDrawAmount) >= getMiniumBalance();
     }
+
+    @Override
+    public double getInterestRate() {
+        return 0.025;
+    }
 }
