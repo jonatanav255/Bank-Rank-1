@@ -22,6 +22,15 @@ public class Main {
         bob.deposit(75.0);
         bob.withdraw(25.0);
 
+        // Apply interest
+        double aliceInterest = alice.applyInterest();
+        double bobInterest = bob.applyInterest();
+
+        System.out.println("=== Interest Applied ===");
+        System.out.println("Alice (Savings 2.5%): $" + aliceInterest);
+        System.out.println("Bob (Checking 0%): $" + bobInterest);
+        System.out.println();
+
         // Show transaction histories
         System.out.println("=== Alice's Transaction History ===");
         alice.getTransactionHistory().forEach(t ->

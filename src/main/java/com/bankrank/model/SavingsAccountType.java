@@ -14,6 +14,6 @@ public class SavingsAccountType implements AccountType {
 
     @Override
     public double getInterestRate() {
-        return 0.25;
+        return 0.025;
     }
 }

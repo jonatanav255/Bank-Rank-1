@@ -110,11 +110,15 @@ public class Account {
         return true;
     }
 
-     public double applyInterest(){
-        double interest = Balance * AccountType.getInterestRate();
+    public double applyInterest() {
 
+        double interest = Balance * AccountType.getInterestRate();
         Balance += interest;
 
-    
+        Transaction applyInterestTransaction = new Transaction(TransactionType.INTEREST, interest, "Interest amount " + interest);
+        transactionHistory.add(applyInterestTransaction);
+
+        return interest;
+
     }
 }
