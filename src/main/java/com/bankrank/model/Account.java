@@ -64,6 +64,9 @@ public class Account {
             return false;
         }
         Balance -= amount;
+        Transaction withdraw = new Transaction(TransactionType.WITHDRAWAL, amount, "Withdraw $" + amount);
+        transactionHistory.add(withdraw);
+
         return true;
     }
 
@@ -97,6 +100,12 @@ public class Account {
         // PHASE 2: EXECUTE (all validations passed, safe to proceed)
         this.Balance -= amount;
         destinationAccount.Balance += amount;
+
+        Transaction sourceTransaction = new Transaction(TransactionType.TRANSFER, amount, "transfer to " + destinationAccount.CustomerName);
+        Transaction destinationAccountTransaction = new Transaction(TransactionType.TRANSFER, amount, "Transfer from " + CustomerName);
+
+        transactionHistory.add(sourceTransaction);
+        destinationAccount.transactionHistory.add(destinationAccountTransaction);
 
         return true;
     }
