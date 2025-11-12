@@ -1,5 +1,6 @@
 package com.bankrank.model;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -13,13 +14,13 @@ public class Account {
 
     private UUID AccountNumber;
     private String CustomerName;
-    private double Balance;
+    private BigDecimal Balance;
     private LocalDate DateCreated;
     private AccountType AccountType;
     private List<Transaction> transactionHistory;
 
     //constructor
-    public Account(UUID AccountNumber, String CustomerName, double InitialValue, AccountType AccountType) {
+    public Account(UUID AccountNumber, String CustomerName, BigDecimal InitialValue, AccountType AccountType) {
         this.AccountNumber = AccountNumber;
         this.CustomerName = CustomerName;
         this.Balance = InitialValue;
@@ -37,7 +38,7 @@ public class Account {
         return CustomerName;
     }
 
-    public double getBalance() {
+    public BigDecimal getBalance() {
         return Balance;
     }
 
@@ -45,25 +46,25 @@ public class Account {
         return DateCreated;
     }
 
-    public void deposit(double amount) {
-        if (amount <= 0) {
+    public void deposit(BigDecimal amount) {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Amount cannot be 0 or a negative amount");
         }
 
-        this.Balance = Balance + amount;
+        this.Balance = Balance.add(amount);
         Transaction depositTransaction = new Transaction(TransactionType.DEPOSIT, amount, "Deposit of $" + amount);
         transactionHistory.add(depositTransaction);
     }
 
-    public boolean withdraw(double amount) {
-        if (amount <= 0) {
+    public boolean withdraw(BigDecimal amount) {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Amount cannot be 0 or a negative amount");
         }
 
         if (!AccountType.canWithdraw(Balance, amount)) {
             return false;
         }
-        Balance -= amount;
+        Balance = Balance.subtract(amount);
         Transaction withdraw = new Transaction(TransactionType.WITHDRAWAL, amount, "Withdraw $" + amount);
         transactionHistory.add(withdraw);
 
@@ -74,10 +75,10 @@ public class Account {
         return transactionHistory;
     }
 
-    public boolean transferTo(Account destinationAccount, double amount) {
+    public boolean transferTo(Account destinationAccount, BigDecimal amount) {
 
         // Validation 1: Amount must be positive
-        if (amount <= 0) {
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             return false;
         }
 
@@ -92,14 +93,13 @@ public class Account {
         }
 
         // Validation 4: Source account must be able to withdraw this amount
-        // This checks both sufficient funds AND minimum balance requirements
         if (!this.AccountType.canWithdraw(this.Balance, amount)) {
             return false;
         }
 
         // PHASE 2: EXECUTE (all validations passed, safe to proceed)
-        this.Balance -= amount;
-        destinationAccount.Balance += amount;
+        this.Balance = this.Balance.subtract(amount);
+        destinationAccount.Balance = destinationAccount.Balance.add(amount);
 
         Transaction sourceTransaction = new Transaction(TransactionType.TRANSFER, amount, "transfer to " + destinationAccount.CustomerName);
         Transaction destinationAccountTransaction = new Transaction(TransactionType.TRANSFER, amount, "Transfer from " + CustomerName);
@@ -110,10 +110,10 @@ public class Account {
         return true;
     }
 
-    public double applyInterest() {
+    public BigDecimal applyInterest() {
 
-        double interest = Balance * AccountType.getInterestRate();
-        Balance += interest;
+        BigDecimal interest = Balance.multiply(AccountType.getInterestRate());
+        Balance = Balance.add(interest);
 
         Transaction applyInterestTransaction = new Transaction(TransactionType.INTEREST, interest, "Interest amount " + interest);
         transactionHistory.add(applyInterestTransaction);

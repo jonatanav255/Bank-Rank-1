@@ -1,5 +1,6 @@
 package com.bankrank;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 import com.bankrank.model.Account;
@@ -12,19 +13,19 @@ public class Main {
         SavingsAccountType savingsType = new SavingsAccountType();
         CheckingAccountType checkingType = new CheckingAccountType();
 
-        Account alice = new Account(UUID.randomUUID(), "Alice", 500.0, savingsType);
-        Account bob = new Account(UUID.randomUUID(), "Bob", 200.0, checkingType);
+        Account alice = new Account(UUID.randomUUID(), "Alice", new BigDecimal("500.00"), savingsType);
+        Account bob = new Account(UUID.randomUUID(), "Bob", new BigDecimal("200.00"), checkingType);
 
         // Perform transactions
-        alice.deposit(100.0);
-        alice.withdraw(50.0);
-        alice.transferTo(bob, 150.0);
-        bob.deposit(75.0);
-        bob.withdraw(25.0);
+        alice.deposit(new BigDecimal("100.00"));
+        alice.withdraw(new BigDecimal("50.00"));
+        alice.transferTo(bob, new BigDecimal("150.00"));
+        bob.deposit(new BigDecimal("75.00"));
+        bob.withdraw(new BigDecimal("25.00"));
 
         // Apply interest
-        double aliceInterest = alice.applyInterest();
-        double bobInterest = bob.applyInterest();
+        BigDecimal aliceInterest = alice.applyInterest();
+        BigDecimal bobInterest = bob.applyInterest();
 
         System.out.println("=== Interest Applied ===");
         System.out.println("Alice (Savings 2.5%): $" + aliceInterest);

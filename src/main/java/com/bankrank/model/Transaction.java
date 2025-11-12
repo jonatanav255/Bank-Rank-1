@@ -1,33 +1,27 @@
 package com.bankrank.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-//   - Transaction type (String: "DEPOSIT", "WITHDRAWAL", "TRANSFER")
-//   - Amount (double)
-//   - Date/time (LocalDateTime)
-//   - Description (String)
-//   - Constructor that takes all these fields
-//   - Getters for all fields
 public class Transaction {
 
     private TransactionType type;
-    private double amount;
+    private BigDecimal amount;
     private LocalDateTime date;
     private String description;
 
-    public Transaction(TransactionType type, double amount, String description) {
+    public Transaction(TransactionType type, BigDecimal amount, String description) {
         this.type = type;
         this.amount = amount;
         this.date = LocalDateTime.now();
         this.description = description;
     }
 
-//     getters
     public TransactionType getTransactionType() {
         return type;
     }
 
-    public double getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
@@ -38,6 +32,4 @@ public class Transaction {
     public String getDescription() {
         return description;
     }
-
-//     setters
 }

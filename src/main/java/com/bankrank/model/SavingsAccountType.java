@@ -1,19 +1,21 @@
 package com.bankrank.model;
 
+import java.math.BigDecimal;
+
 public class SavingsAccountType implements AccountType {
 
     @Override
-    public double getMiniumBalance() {
-        return 100;
+    public BigDecimal getMiniumBalance() {
+        return new BigDecimal("100.00");
     }
 
     @Override
-    public boolean canWithdraw(double currentBalance, double withDrawAmount) {
-        return (currentBalance - withDrawAmount) >= getMiniumBalance();
+    public boolean canWithdraw(BigDecimal currentBalance, BigDecimal withDrawAmount) {
+        return currentBalance.subtract(withDrawAmount).compareTo(getMiniumBalance()) >= 0;
     }
 
     @Override
-    public double getInterestRate() {
-        return 0.025;
+    public BigDecimal getInterestRate() {
+        return new BigDecimal("0.025");
     }
 }

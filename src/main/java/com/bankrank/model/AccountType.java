@@ -1,14 +1,12 @@
 package com.bankrank.model;
 
+import java.math.BigDecimal;
+
 public interface AccountType {
-    // Savings and Checking
 
-    double getMiniumBalance();
+    BigDecimal getMiniumBalance();
 
-    boolean canWithdraw(double currentBalance, double withDrawAmount);
+    boolean canWithdraw(BigDecimal currentBalance, BigDecimal withDrawAmount);
 
-    double getInterestRate();
-
-    // "What's your minimum balance?"
-    // "Can I withdraw this amount given the current balance?"
+    BigDecimal getInterestRate();
 }
