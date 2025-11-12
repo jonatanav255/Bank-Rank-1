@@ -109,4 +109,12 @@ public class Account {
 
         return true;
     }
+
+     public double applyInterest(){
+        double interest = Balance * AccountType.getInterestRate();
+
+        Balance += interest;
+
+    
+    }
 }
