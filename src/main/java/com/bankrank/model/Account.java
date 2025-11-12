@@ -46,6 +46,10 @@ public class Account {
         return DateCreated;
     }
 
+    public AccountType getAccountType() {
+        return AccountType;
+    }
+
     public void deposit(BigDecimal amount) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Amount cannot be 0 or a negative amount");

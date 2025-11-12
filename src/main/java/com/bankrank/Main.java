@@ -1,8 +1,11 @@
 package com.bankrank;
 
 import java.math.BigDecimal;
+import java.sql.SQLException;
 import java.util.UUID;
 
+import com.bankrank.database.AccountDAO;
+import com.bankrank.database.DatabaseConnection;
 import com.bankrank.model.Account;
 import com.bankrank.model.SavingsAccountType;
 import com.bankrank.model.CheckingAccountType;
@@ -10,6 +13,12 @@ import com.bankrank.model.CheckingAccountType;
 public class Main {
 
     public static void main(String[] args) {
+        // Test database connection
+        if (!DatabaseConnection.testConnection()) {
+            System.out.println("Failed to connect to database!");
+            return;
+        }
+        System.out.println("Database connected successfully!\n");
         SavingsAccountType savingsType = new SavingsAccountType();
         CheckingAccountType checkingType = new CheckingAccountType();
 
@@ -46,5 +55,32 @@ public class Main {
         System.out.println("\nFinal Balances:");
         System.out.println("Alice: $" + alice.getBalance());
         System.out.println("Bob: $" + bob.getBalance());
+
+        // Test database persistence
+        System.out.println("\n=== Testing Database ===");
+        AccountDAO dao = new AccountDAO();
+
+        try {
+            // Save Alice's account
+            dao.save(alice);
+            System.out.println("Saved Alice to database");
+
+            // Load Alice from database
+            Account loadedAlice = dao.findById(alice.getAccountNumber());
+            if (loadedAlice != null) {
+                System.out.println("Loaded from database: " + loadedAlice.getCustomerName() +
+                                 " - Balance: $" + loadedAlice.getBalance());
+            }
+
+            // Show all accounts
+            System.out.println("\nAll accounts in database:");
+            for (Account acc : dao.findAll()) {
+                System.out.println(acc.getCustomerName() + " - $" + acc.getBalance());
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Database error: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 }
