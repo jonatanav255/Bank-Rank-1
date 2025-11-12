@@ -5,13 +5,13 @@ import java.math.BigDecimal;
 public class SavingsAccountType implements AccountType {
 
     @Override
-    public BigDecimal getMiniumBalance() {
+    public BigDecimal getMinimumBalance() {
         return new BigDecimal("100.00");
     }
 
     @Override
     public boolean canWithdraw(BigDecimal currentBalance, BigDecimal withDrawAmount) {
-        return currentBalance.subtract(withDrawAmount).compareTo(getMiniumBalance()) >= 0;
+        return currentBalance.subtract(withDrawAmount).compareTo(getMinimumBalance()) >= 0;
     }
 
     @Override

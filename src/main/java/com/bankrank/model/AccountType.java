@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 public interface AccountType {
 
-    BigDecimal getMiniumBalance();
+    BigDecimal getMinimumBalance();
 
     boolean canWithdraw(BigDecimal currentBalance, BigDecimal withDrawAmount);
 
