@@ -176,8 +176,7 @@ public class ConsoleMenu {
 
     // here
     private void viewAccountById() {
-        System.out.println("--- View Account by ID ---");
-        // String input = getStringInput("Enter account ID: ");
+        System.out.println("\n--- View Account by ID ---");
         UUID accountId = getAccountId();
         if (accountId == null) {
             return;
@@ -186,21 +185,18 @@ public class ConsoleMenu {
         try {
             Account account = accountDAO.findById(accountId);
             if (account != null) {
-
-                System.out.println("Account number: " + account.getAccountNumber());
-                System.out.println("Account Type: " + getAccountTypeName(account.getAccountType()));
-                System.out.println("Account balance: " + account.getBalance());
-                System.out.println("Account name: " + account.getCustomerName());
-                System.out.println("Account date created: " + account.getDateCreated());
-                // here
+                System.out.println("\nAccount ID: " + account.getAccountNumber());
+                System.out.println("Customer: " + account.getCustomerName());
+                System.out.println("Type: " + getAccountTypeName(account.getAccountType()));
+                System.out.println("Balance: $" + account.getBalance());
+                System.out.println("Created: " + account.getDateCreated());
             } else {
-                System.out.println("Account not found");
+                System.out.println("Account not found!");
             }
 
         } catch (SQLException e) {
             System.out.println("Database error: " + e.getMessage());
         }
-
     }
 
     private void deposit() {
