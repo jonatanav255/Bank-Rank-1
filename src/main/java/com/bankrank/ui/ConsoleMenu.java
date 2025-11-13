@@ -175,25 +175,26 @@ public class ConsoleMenu {
     }
 
     // here
-    public void viewAccountById() {
+    private void viewAccountById() {
         System.out.println("--- View Account by ID ---");
         // String input = getStringInput("Enter account ID: ");
         UUID accountId = getAccountId();
-
         if (accountId == null) {
-            System.out.println("Account not found!");
             return;
         }
+
         try {
             Account account = accountDAO.findById(accountId);
             if (account != null) {
-                System.err.println(account.getAccountNumber());
-                System.err.println(account.getAccountType());
-                System.err.println(account.getBalance());
-                System.err.println(account.getCustomerName());
-                System.err.println(account.getDateCreated());
+
+                System.out.println("Account number: " + account.getAccountNumber());
+                System.out.println("Account Type: " + getAccountTypeName(account.getAccountType()));
+                System.out.println("Account balance: " + account.getBalance());
+                System.out.println("Account name: " + account.getCustomerName());
+                System.out.println("Account date created: " + account.getDateCreated());
+                // here
             } else {
-                System.err.println("Account not found");
+                System.out.println("Account not found");
             }
 
         } catch (SQLException e) {
@@ -435,5 +436,14 @@ public class ConsoleMenu {
             return str;
         }
         return str.substring(0, maxLength - 3) + "...";
+    }
+
+    private String getAccountTypeName(AccountType accountType) {
+        if (accountType instanceof SavingsAccountType) {
+            return "SAVINGS";
+        } else if (accountType instanceof CheckingAccountType) {
+            return "CHECKING";
+        }
+        throw new IllegalArgumentException("Unknown account type");
     }
 }
