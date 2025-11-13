@@ -13,12 +13,12 @@ import java.util.List;
 // Implement proper encapsulation - balance shouldn't be directly accessible
 public class Account {
 
-    private UUID AccountNumber;
-    private String CustomerName;
+    private final UUID AccountNumber;
+    private final String CustomerName;
     private BigDecimal Balance;
-    private LocalDate DateCreated;
-    private AccountType AccountType;
-    private List<Transaction> transactionHistory;
+    private final LocalDate DateCreated;
+    private final AccountType AccountType;
+    private final List<Transaction> transactionHistory;
 
     //constructor
     public Account(UUID AccountNumber, String CustomerName, BigDecimal InitialValue, AccountType AccountType) {

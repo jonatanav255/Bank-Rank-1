@@ -33,6 +33,7 @@ public class ConsoleMenu {
     /**
      * Starts the console menu loop.
      */
+    @SuppressWarnings("ConvertToTryWithResources")
     public void start() {
         // Test database connection
         if (!DatabaseConnection.testConnection()) {
@@ -92,13 +93,16 @@ public class ConsoleMenu {
         System.out.println("2. Checking (0% interest, $0 minimum balance)");
         int typeChoice = getIntInput("Enter choice: ");
 
-        AccountType accountType;
-        if (typeChoice == 1) {
-            accountType = new SavingsAccountType();
-        } else if (typeChoice == 2) {
-            accountType = new CheckingAccountType();
-        } else {
-            System.out.println("Invalid account type!");
+        AccountType accountType = switch (typeChoice) {
+            case 1 -> new SavingsAccountType();
+            case 2 -> new CheckingAccountType();
+            default -> {
+                System.out.println("Invalid account type!");
+                yield null;
+            }
+        };
+
+        if (accountType == null) {
             return;
         }
 

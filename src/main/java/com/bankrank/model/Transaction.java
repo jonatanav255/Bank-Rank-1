@@ -5,10 +5,10 @@ import java.time.LocalDateTime;
 
 public class Transaction {
 
-    private TransactionType type;
-    private BigDecimal amount;
-    private LocalDateTime date;
-    private String description;
+    private final TransactionType type;
+    private final BigDecimal amount;
+    private final LocalDateTime date;
+    private final String description;
 
     public Transaction(TransactionType type, BigDecimal amount, String description, LocalDateTime date) {
         this.type = type;
