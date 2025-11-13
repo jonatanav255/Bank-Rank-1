@@ -185,13 +185,16 @@ public class ConsoleMenu {
         try {
             Account account = accountDAO.findById(accountId);
             if (account != null) {
-                System.out.println("\n╔════════════════════════════════════════════════════════════════╗");
-                System.out.printf("║ Account ID: %-50s ║%n", account.getAccountNumber());
-                System.out.printf("║ Customer: %-53s ║%n", account.getCustomerName());
-                System.out.printf("║ Type: %-57s ║%n", getAccountTypeName(account.getAccountType()));
-                System.out.printf("║ Balance: $%-52s ║%n", account.getBalance());
-                System.out.printf("║ Created: %-54s ║%n", account.getDateCreated());
-                System.out.println("╚════════════════════════════════════════════════════════════════╝");
+                int width = 70;
+                String border = "═".repeat(width);
+
+                System.out.println("\n╔" + border + "╗");
+                System.out.println(String.format("║ Account ID: %-" + (width - 14) + "s ║", account.getAccountNumber()));
+                System.out.println(String.format("║ Customer: %-" + (width - 12) + "s ║", account.getCustomerName()));
+                System.out.println(String.format("║ Type: %-" + (width - 8) + "s ║", getAccountTypeName(account.getAccountType())));
+                System.out.println(String.format("║ Balance: $%-" + (width - 12) + "s ║", account.getBalance()));
+                System.out.println(String.format("║ Created: %-" + (width - 11) + "s ║", account.getDateCreated()));
+                System.out.println("╚" + border + "╝");
             } else {
                 System.out.println("Account not found!");
             }
