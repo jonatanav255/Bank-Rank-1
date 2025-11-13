@@ -66,7 +66,8 @@ public class ConsoleMenu {
         System.out.println("6. Transfer Money");
         System.out.println("7. View Transaction History");
         System.out.println("8. Apply Interest");
-        System.out.println("9. Exit");
+        System.out.println("9. Generate Account Statement");
+        System.out.println("10. Exit");
         System.out.println("═════════════════");
     }
 
@@ -89,6 +90,8 @@ public class ConsoleMenu {
             case 8 ->
                 applyInterest();
             case 9 ->
+                generateStatement();
+            case 10 ->
                 exit();
             default ->
                 System.out.println("Invalid choice. Please try again.");
@@ -377,6 +380,30 @@ public class ConsoleMenu {
         }
     }
 
+    private void generateStatement() {
+        System.out.println("\n--- Generate Statement ---");
+
+        UUID accountId = getAccountId();
+        if (accountId == null) {
+            return;
+        }
+        // 853ddd6a-7b4f-4b76-a917-d8e91850db33
+        try {
+            Account account = accountDAO.findById(accountId);
+            if (account == null) {
+                System.out.println("Account not found!");
+                return;
+            }
+
+            System.out.println(account.getAccountNumber());
+            System.out.println(account.getCustomerName());
+
+        } catch (SQLException e) {
+            System.out.println("Database error: " + e.getMessage());
+        }
+
+    }
+
     private void exit() {
         System.out.println("\nExiting...");
         running = false;
@@ -437,4 +464,5 @@ public class ConsoleMenu {
         }
         throw new IllegalArgumentException("Unknown account type");
     }
+
 }
