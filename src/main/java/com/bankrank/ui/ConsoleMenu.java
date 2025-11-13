@@ -251,20 +251,13 @@ public class ConsoleMenu {
 
             BigDecimal amount = getBigDecimalInput("Enter withdrawal amount: $");
 
-            boolean success = account.withdraw(amount);
-
-            if (success) {
-                accountDAO.update(account);
-                System.out.println("\n✓ Withdrawal successful!");
-                System.out.println("New balance: $" + account.getBalance());
-            } else {
-                System.out.println("\n✗ Withdrawal failed!");
-                System.out.println("Insufficient funds or would violate minimum balance requirement.");
-                System.out.println("Current balance: $" + account.getBalance());
-                System.out.println("Minimum balance: $" + account.getAccountType().getMinimumBalance());
-            }
+            account.withdraw(amount);
+            accountDAO.update(account);
+            System.out.println("\n✓ Withdrawal successful!");
+            System.out.println("New balance: $" + account.getBalance());
 
         } catch (IllegalArgumentException e) {
+            System.out.println("\n✗ Withdrawal failed!");
             System.out.println("Error: " + e.getMessage());
         } catch (SQLException e) {
             System.out.println("Database error: " + e.getMessage());
@@ -297,20 +290,17 @@ public class ConsoleMenu {
 
             BigDecimal amount = getBigDecimalInput("Enter transfer amount: $");
 
-            boolean success = sourceAccount.transferTo(destAccount, amount);
+            sourceAccount.transferTo(destAccount, amount);
+            accountDAO.update(sourceAccount);
+            accountDAO.update(destAccount);
 
-            if (success) {
-                accountDAO.update(sourceAccount);
-                accountDAO.update(destAccount);
+            System.out.println("\n✓ Transfer successful!");
+            System.out.println("From: " + sourceAccount.getCustomerName() + " - New balance: $" + sourceAccount.getBalance());
+            System.out.println("To: " + destAccount.getCustomerName() + " - New balance: $" + destAccount.getBalance());
 
-                System.out.println("\n✓ Transfer successful!");
-                System.out.println("From: " + sourceAccount.getCustomerName() + " - New balance: $" + sourceAccount.getBalance());
-                System.out.println("To: " + destAccount.getCustomerName() + " - New balance: $" + destAccount.getBalance());
-            } else {
-                System.out.println("\n✗ Transfer failed!");
-                System.out.println("Insufficient funds, same account, or would violate minimum balance.");
-            }
-
+        } catch (IllegalArgumentException e) {
+            System.out.println("\n✗ Transfer failed!");
+            System.out.println("Error: " + e.getMessage());
         } catch (SQLException e) {
             System.out.println("Database error: " + e.getMessage());
         }

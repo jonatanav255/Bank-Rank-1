@@ -10,7 +10,6 @@ import java.math.BigDecimal;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-// import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -133,11 +132,8 @@ public class AccountDAO {
 
             while (rs.next()) {
                 UUID accountId = (UUID) rs.getObject("id");
-                // Account account = mapResultSetToAccount(rs, );
                 List<Transaction> transactions = loadTransactions(conn, accountId);
-
-                Account account  = mapResultSetToAccount(rs, transactions);
-                // loadTransactions(conn, );
+                Account account = mapResultSetToAccount(rs, transactions);
                 accounts.add(account);
             }
         }
@@ -225,9 +221,6 @@ public class AccountDAO {
                 transactions.add(transaction);
             }
             return transactions;
-
-            // Note: Can't directly add to account's transaction history
-            // This is a design limitation - in production, you'd refactor Account class
         }
     }
 

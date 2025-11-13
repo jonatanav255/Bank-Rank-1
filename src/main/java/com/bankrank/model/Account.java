@@ -13,51 +13,51 @@ import java.util.List;
 // Implement proper encapsulation - balance shouldn't be directly accessible
 public class Account {
 
-    private final UUID AccountNumber;
-    private final String CustomerName;
-    private BigDecimal Balance;
-    private final LocalDate DateCreated;
-    private final AccountType AccountType;
+    private final UUID accountNumber;
+    private final String customerName;
+    private BigDecimal balance;
+    private final LocalDate dateCreated;
+    private final AccountType accountType;
     private final List<Transaction> transactionHistory;
 
     //constructor
-    public Account(UUID AccountNumber, String CustomerName, BigDecimal InitialValue, AccountType AccountType) {
-        this.AccountNumber = AccountNumber;
-        this.CustomerName = CustomerName;
-        this.Balance = InitialValue;
-        this.DateCreated = LocalDate.now();
-        this.AccountType = AccountType;
+    public Account(UUID accountNumber, String customerName, BigDecimal initialValue, AccountType accountType) {
+        this.accountNumber = accountNumber;
+        this.customerName = customerName;
+        this.balance = initialValue;
+        this.dateCreated = LocalDate.now();
+        this.accountType = accountType;
         this.transactionHistory = new ArrayList<>();
     }
 
-    public Account(UUID AccountNumber, String CustomerName, BigDecimal InitialValue, AccountType AccountType, LocalDate dateCreated, List<Transaction> transactions) {
-        this.AccountNumber = AccountNumber;
-        this.CustomerName = CustomerName;
-        this.Balance = InitialValue;
-        this.DateCreated = dateCreated;
-        this.AccountType = AccountType;
+    public Account(UUID accountNumber, String customerName, BigDecimal initialValue, AccountType accountType, LocalDate dateCreated, List<Transaction> transactions) {
+        this.accountNumber = accountNumber;
+        this.customerName = customerName;
+        this.balance = initialValue;
+        this.dateCreated = dateCreated;
+        this.accountType = accountType;
         this.transactionHistory = new ArrayList<>(transactions);
     }
 
     // getters
     public UUID getAccountNumber() {
-        return AccountNumber;
+        return accountNumber;
     }
 
     public String getCustomerName() {
-        return CustomerName;
+        return customerName;
     }
 
     public BigDecimal getBalance() {
-        return Balance;
+        return balance;
     }
 
     public LocalDate getDateCreated() {
-        return DateCreated;
+        return dateCreated;
     }
 
     public AccountType getAccountType() {
-        return AccountType;
+        return accountType;
     }
 
     public void deposit(BigDecimal amount) {
@@ -65,69 +65,65 @@ public class Account {
             throw new IllegalArgumentException("Amount cannot be 0 or a negative amount");
         }
 
-        this.Balance = Balance.add(amount);
+        this.balance = balance.add(amount);
         Transaction depositTransaction = new Transaction(TransactionType.DEPOSIT, amount, "Deposit of $" + amount, LocalDateTime.now());
         transactionHistory.add(depositTransaction);
     }
 
-    public boolean withdraw(BigDecimal amount) {
+    public void withdraw(BigDecimal amount) {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Amount cannot be 0 or a negative amount");
         }
 
-        if (!AccountType.canWithdraw(Balance, amount)) {
-            return false;
+        if (!accountType.canWithdraw(balance, amount)) {
+            throw new IllegalArgumentException("Insufficient funds or withdrawal would violate minimum balance requirement");
         }
-        Balance = Balance.subtract(amount);
+        balance = balance.subtract(amount);
         Transaction withdraw = new Transaction(TransactionType.WITHDRAWAL, amount, "Withdraw $" + amount, LocalDateTime.now());
         transactionHistory.add(withdraw);
-
-        return true;
     }
 
     public List<Transaction> getTransactionHistory() {
         return transactionHistory;
     }
 
-    public boolean transferTo(Account destinationAccount, BigDecimal amount) {
+    public void transferTo(Account destinationAccount, BigDecimal amount) {
 
         // Validation 1: Amount must be positive
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            return false;
+            throw new IllegalArgumentException("Transfer amount must be positive");
         }
 
         // Validation 2: Destination account must exist and be different
         if (destinationAccount == null) {
-            return false;
+            throw new IllegalArgumentException("Destination account cannot be null");
         }
 
         // Validation 3: Can't transfer to the same account
-        if (this.AccountNumber.equals(destinationAccount.AccountNumber)) {
-            return false;
+        if (this.accountNumber.equals(destinationAccount.accountNumber)) {
+            throw new IllegalArgumentException("Cannot transfer to the same account");
         }
 
         // Validation 4: Source account must be able to withdraw this amount
-        if (!this.AccountType.canWithdraw(this.Balance, amount)) {
-            return false;
+        if (!this.accountType.canWithdraw(this.balance, amount)) {
+            throw new IllegalArgumentException("Insufficient funds or transfer would violate minimum balance requirement");
         }
 
         // PHASE 2: EXECUTE (all validations passed, safe to proceed)
-        this.Balance = this.Balance.subtract(amount);
-        destinationAccount.Balance = destinationAccount.Balance.add(amount);
+        this.balance = this.balance.subtract(amount);
+        destinationAccount.balance = destinationAccount.balance.add(amount);
 
-        Transaction sourceTransaction = new Transaction(TransactionType.TRANSFER, amount, "transfer to " + destinationAccount.CustomerName, LocalDateTime.now());
-        Transaction destinationAccountTransaction = new Transaction(TransactionType.TRANSFER, amount, "Transfer from " + CustomerName, LocalDateTime.now());
+        Transaction sourceTransaction = new Transaction(TransactionType.TRANSFER, amount, "transfer to " + destinationAccount.customerName, LocalDateTime.now());
+        Transaction destinationAccountTransaction = new Transaction(TransactionType.TRANSFER, amount, "Transfer from " + customerName, LocalDateTime.now());
 
         transactionHistory.add(sourceTransaction);
         destinationAccount.transactionHistory.add(destinationAccountTransaction);
-
-        return true;
     }
 
     public BigDecimal applyInterest() {
 
-        BigDecimal interest = Balance.multiply(AccountType.getInterestRate());
-        Balance = Balance.add(interest);
+        BigDecimal interest = balance.multiply(accountType.getInterestRate());
+        balance = balance.add(interest);
 
         Transaction applyInterestTransaction = new Transaction(TransactionType.INTEREST, interest, "Interest amount " + interest, LocalDateTime.now());
         transactionHistory.add(applyInterestTransaction);
