@@ -5,12 +5,10 @@ import com.bankrank.model.AccountType;
 import com.bankrank.model.CheckingAccountType;
 import com.bankrank.model.SavingsAccountType;
 import com.bankrank.model.Transaction;
-import com.bankrank.model.TransactionType;
 
 import java.math.BigDecimal;
 import java.sql.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+// import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -206,7 +204,7 @@ public class AccountDAO {
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setObject(1, account.getAccountNumber());
-            ResultSet rs = stmt.executeQuery();
+            // ResultSet rs = stmt.executeQuery();
 
             // Note: Can't directly add to account's transaction history
             // This is a design limitation - in production, you'd refactor Account class
@@ -217,7 +215,7 @@ public class AccountDAO {
         UUID id = (UUID) rs.getObject("id");
         String customerName = rs.getString("customer_name");
         BigDecimal balance = rs.getBigDecimal("balance");
-        LocalDate dateCreated = rs.getTimestamp("date_created").toLocalDateTime().toLocalDate();
+        // LocalDate dateCreated = rs.getTimestamp("date_created").toLocalDateTime().toLocalDate();
         String accountTypeName = rs.getString("account_type");
 
         AccountType accountType = createAccountType(accountTypeName);
