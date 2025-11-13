@@ -2,32 +2,34 @@ package com.bankrank.ui;
 
 import com.bankrank.database.AccountDAO;
 import com.bankrank.database.DatabaseConnection;
-import com.bankrank.model.Account;
-import com.bankrank.model.AccountType;
-import com.bankrank.model.CheckingAccountType;
-import com.bankrank.model.SavingsAccountType;
-import com.bankrank.model.Transaction;
 
-import java.math.BigDecimal;
-import java.sql.SQLException;
-import java.util.List;
 import java.util.Scanner;
-import java.util.UUID;
 
 /**
- * Console-based user interface for the banking application. Provides
- * menu-driven interaction for all banking operations.
+ * Main console menu - delegates to specialized menu classes.
  */
 public class ConsoleMenu {
 
     private final Scanner scanner;
     private final AccountDAO accountDAO;
+    private final InputHelper inputHelper;
     private boolean running;
+
+    // Specialized menu handlers
+    private final AccountMenu accountMenu;
+    private final TransactionMenu transactionMenu;
+    private final ReportMenu reportMenu;
 
     public ConsoleMenu() {
         this.scanner = new Scanner(System.in);
         this.accountDAO = new AccountDAO();
+        this.inputHelper = new InputHelper(scanner);
         this.running = true;
+
+        // Initialize specialized menus
+        this.accountMenu = new AccountMenu(scanner, accountDAO);
+        this.transactionMenu = new TransactionMenu(scanner, accountDAO);
+        this.reportMenu = new ReportMenu(scanner, accountDAO);
     }
 
     /**
@@ -48,7 +50,7 @@ public class ConsoleMenu {
 
         while (running) {
             showMainMenu();
-            int choice = getIntInput("Enter choice: ");
+            int choice = inputHelper.getIntInput("Enter choice: ");
             handleMainMenu(choice);
         }
 
@@ -74,23 +76,23 @@ public class ConsoleMenu {
     private void handleMainMenu(int choice) {
         switch (choice) {
             case 1 ->
-                createAccount();
+                accountMenu.createAccount();
             case 2 ->
-                viewAllAccounts();
+                accountMenu.viewAllAccounts();
             case 3 ->
-                viewAccountById();
+                accountMenu.viewAccountById();
             case 4 ->
-                deposit();
+                transactionMenu.deposit();
             case 5 ->
-                withdraw();
+                transactionMenu.withdraw();
             case 6 ->
-                transfer();
+                transactionMenu.transfer();
             case 7 ->
-                viewTransactionHistory();
+                reportMenu.viewTransactionHistory();
             case 8 ->
-                applyInterest();
+                transactionMenu.applyInterest();
             case 9 ->
-                generateStatement();
+                reportMenu.generateStatement();
             case 10 ->
                 exit();
             default ->
@@ -98,371 +100,8 @@ public class ConsoleMenu {
         }
     }
 
-    private void createAccount() {
-        System.out.println("\n--- Create New Account ---");
-
-        String customerName = getStringInput("Enter customer name: ");
-
-        System.out.println("Select account type:");
-        System.out.println("1. Savings (2.5% interest, $100 minimum balance)");
-        System.out.println("2. Checking (0% interest, $0 minimum balance)");
-        int typeChoice = getIntInput("Enter choice: ");
-
-        AccountType accountType = switch (typeChoice) {
-            case 1 ->
-                new SavingsAccountType();
-            case 2 ->
-                new CheckingAccountType();
-            default -> {
-                System.out.println("Invalid account type!");
-                yield null;
-            }
-        };
-
-        if (accountType == null) {
-            return;
-        }
-
-        BigDecimal initialDeposit = getBigDecimalInput("Enter initial deposit: $");
-
-        if (initialDeposit.compareTo(BigDecimal.ZERO) < 0) {
-            System.out.println("Initial deposit cannot be negative!");
-            return;
-        }
-
-        // Check minimum balance requirement
-        if (initialDeposit.compareTo(accountType.getMinimumBalance()) < 0) {
-            System.out.println("Initial deposit must be at least $" + accountType.getMinimumBalance());
-            return;
-        }
-
-        try {
-            Account account = new Account(UUID.randomUUID(), customerName, initialDeposit, accountType);
-            accountDAO.save(account);
-            System.out.println("\n✓ Account created successfully!");
-            System.out.println("Account ID: " + account.getAccountNumber());
-            System.out.println("Customer: " + customerName);
-            System.out.println("Balance: $" + account.getBalance());
-        } catch (SQLException e) {
-            System.out.println("Error creating account: " + e.getMessage());
-        }
-    }
-
-    private void viewAllAccounts() {
-        System.out.println("\n--- All Accounts ---");
-
-        try {
-            List<Account> accounts = accountDAO.findAll();
-
-            if (accounts.isEmpty()) {
-                System.out.println("No accounts found.");
-                return;
-            }
-
-            System.out.println("\n╔════════════════════════════════════════════════════════════════════════╗");
-            System.out.printf("║ %-36s │ %-15s │ %-12s ║%n", "Account ID", "Customer", "Balance");
-            System.out.println("╠════════════════════════════════════════════════════════════════════════╣");
-
-            for (Account account : accounts) {
-                System.out.printf("║ %-36s │ %-15s │ $%-11s ║%n",
-                        account.getAccountNumber().toString().substring(0, 36),
-                        truncate(account.getCustomerName(), 15),
-                        account.getBalance());
-            }
-
-            System.out.println("╚════════════════════════════════════════════════════════════════════════╝");
-
-        } catch (SQLException e) {
-            System.out.println("Error loading accounts: " + e.getMessage());
-        }
-    }
-
-    // here
-    private void viewAccountById() {
-        System.out.println("\n--- View Account by ID ---");
-        UUID accountId = getAccountId();
-        if (accountId == null) {
-            return;
-        }
-
-        try {
-            Account account = accountDAO.findById(accountId);
-            if (account != null) {
-                int width = 70;
-                String border = "═".repeat(width);
-
-                System.out.println("\n╔" + border + "╗");
-                System.out.println(String.format("║ Account ID: %-" + (width - 14) + "s ║", account.getAccountNumber()));
-                System.out.println(String.format("║ Customer: %-" + (width - 12) + "s ║", account.getCustomerName()));
-                System.out.println(String.format("║ Type: %-" + (width - 8) + "s ║", getAccountTypeName(account.getAccountType())));
-                System.out.println(String.format("║ Balance: $%-" + (width - 12) + "s ║", account.getBalance()));
-                System.out.println(String.format("║ Created: %-" + (width - 11) + "s ║", account.getDateCreated()));
-                System.out.println("╚" + border + "╝");
-            } else {
-                System.out.println("Account not found!");
-            }
-
-        } catch (SQLException e) {
-            System.out.println("Database error: " + e.getMessage());
-        }
-    }
-
-    private void deposit() {
-        System.out.println("\n--- Deposit Money ---");
-
-        UUID accountId = getAccountId();
-        if (accountId == null) {
-            return;
-        }
-
-        try {
-            Account account = accountDAO.findById(accountId);
-            if (account == null) {
-                System.out.println("Account not found!");
-                return;
-            }
-
-            BigDecimal amount = getBigDecimalInput("Enter deposit amount: $");
-
-            account.deposit(amount);
-            accountDAO.update(account);
-
-            System.out.println("\n✓ Deposit successful!");
-            System.out.println("New balance: $" + account.getBalance());
-
-        } catch (IllegalArgumentException e) {
-            System.out.println("Error: " + e.getMessage());
-        } catch (SQLException e) {
-            System.out.println("Database error: " + e.getMessage());
-        }
-    }
-
-    private void withdraw() {
-        System.out.println("\n--- Withdraw Money ---");
-
-        UUID accountId = getAccountId();
-        if (accountId == null) {
-            return;
-        }
-
-        try {
-            Account account = accountDAO.findById(accountId);
-            if (account == null) {
-                System.out.println("Account not found!");
-                return;
-            }
-
-            BigDecimal amount = getBigDecimalInput("Enter withdrawal amount: $");
-
-            account.withdraw(amount);
-            accountDAO.update(account);
-            System.out.println("\n✓ Withdrawal successful!");
-            System.out.println("New balance: $" + account.getBalance());
-
-        } catch (IllegalArgumentException e) {
-            System.out.println("\n✗ Withdrawal failed!");
-            System.out.println("Error: " + e.getMessage());
-        } catch (SQLException e) {
-            System.out.println("Database error: " + e.getMessage());
-        }
-    }
-
-    private void transfer() {
-        System.out.println("\n--- Transfer Money ---");
-
-        System.out.println("Source account:");
-        UUID sourceId = getAccountId();
-        if (sourceId == null) {
-            return;
-        }
-
-        System.out.println("Destination account:");
-        UUID destId = getAccountId();
-        if (destId == null) {
-            return;
-        }
-
-        try {
-            Account sourceAccount = accountDAO.findById(sourceId);
-            Account destAccount = accountDAO.findById(destId);
-
-            if (sourceAccount == null || destAccount == null) {
-                System.out.println("One or both accounts not found!");
-                return;
-            }
-
-            BigDecimal amount = getBigDecimalInput("Enter transfer amount: $");
-
-            sourceAccount.transferTo(destAccount, amount);
-            accountDAO.update(sourceAccount);
-            accountDAO.update(destAccount);
-
-            System.out.println("\n✓ Transfer successful!");
-            System.out.println("From: " + sourceAccount.getCustomerName() + " - New balance: $" + sourceAccount.getBalance());
-            System.out.println("To: " + destAccount.getCustomerName() + " - New balance: $" + destAccount.getBalance());
-
-        } catch (IllegalArgumentException e) {
-            System.out.println("\n✗ Transfer failed!");
-            System.out.println("Error: " + e.getMessage());
-        } catch (SQLException e) {
-            System.out.println("Database error: " + e.getMessage());
-        }
-    }
-
-    private void viewTransactionHistory() {
-        System.out.println("\n--- Transaction History ---");
-
-        UUID accountId = getAccountId();
-        if (accountId == null) {
-            return;
-        }
-
-        try {
-            Account account = accountDAO.findById(accountId);
-            if (account == null) {
-                System.out.println("Account not found!");
-                return;
-            }
-
-            System.out.println("\nAccount: " + account.getCustomerName());
-            System.out.println("Current Balance: $" + account.getBalance());
-            System.out.println("\nTransactions:");
-
-            List<Transaction> transactions = account.getTransactionHistory();
-
-            if (transactions.isEmpty()) {
-                System.out.println("No transactions found.");
-                return;
-            }
-
-            System.out.println("╔════════════════╦═════════════╦══════════════════════════════════════╗");
-            System.out.printf("║ %-14s ║ %-11s ║ %-36s ║%n", "Type", "Amount", "Description");
-            System.out.println("╠════════════════╬═════════════╬══════════════════════════════════════╣");
-
-            for (Transaction t : transactions) {
-                System.out.printf("║ %-14s ║ $%-10s ║ %-36s ║%n",
-                        t.getTransactionType(),
-                        t.getAmount(),
-                        truncate(t.getDescription(), 36));
-            }
-
-            System.out.println("╚════════════════╩═════════════╩══════════════════════════════════════╝");
-
-        } catch (SQLException e) {
-            System.out.println("Database error: " + e.getMessage());
-        }
-    }
-
-    private void applyInterest() {
-        System.out.println("\n--- Apply Interest ---");
-
-        UUID accountId = getAccountId();
-        if (accountId == null) {
-            return;
-        }
-
-        try {
-            Account account = accountDAO.findById(accountId);
-            if (account == null) {
-                System.out.println("Account not found!");
-                return;
-            }
-
-            BigDecimal interest = account.applyInterest();
-            accountDAO.update(account);
-
-            System.out.println("\n✓ Interest applied!");
-            System.out.println("Interest earned: $" + interest);
-            System.out.println("New balance: $" + account.getBalance());
-
-        } catch (SQLException e) {
-            System.out.println("Database error: " + e.getMessage());
-        }
-    }
-
-    private void generateStatement() {
-        System.out.println("\n--- Generate Statement ---");
-
-        UUID accountId = getAccountId();
-        if (accountId == null) {
-            return;
-        }
-        // 853ddd6a-7b4f-4b76-a917-d8e91850db33
-        try {
-            Account account = accountDAO.findById(accountId);
-            if (account == null) {
-                System.out.println("Account not found!");
-                return;
-            }
-
-            System.out.println(account.getAccountNumber());
-            System.out.println(account.getCustomerName());
-
-        } catch (SQLException e) {
-            System.out.println("Database error: " + e.getMessage());
-        }
-
-    }
-
     private void exit() {
         System.out.println("\nExiting...");
         running = false;
     }
-
-    // Helper methods for input
-    private String getStringInput(String prompt) {
-        System.out.print(prompt);
-        return scanner.nextLine().trim();
-    }
-
-    private int getIntInput(String prompt) {
-        while (true) {
-            try {
-                System.out.print(prompt);
-                String input = scanner.nextLine().trim();
-                return Integer.parseInt(input);
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid number. Please try again.");
-            }
-        }
-    }
-
-    private BigDecimal getBigDecimalInput(String prompt) {
-        while (true) {
-            try {
-                System.out.print(prompt);
-                String input = scanner.nextLine().trim();
-                return new BigDecimal(input);
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid amount. Please try again.");
-            }
-        }
-    }
-
-    private UUID getAccountId() {
-        String input = getStringInput("Enter account ID: ");
-        try {
-            return UUID.fromString(input);
-        } catch (IllegalArgumentException e) {
-            System.out.println("Invalid account ID format!");
-            return null;
-        }
-    }
-
-    private String truncate(String str, int maxLength) {
-        if (str.length() <= maxLength) {
-            return str;
-        }
-        return str.substring(0, maxLength - 3) + "...";
-    }
-
-    private String getAccountTypeName(AccountType accountType) {
-        if (accountType instanceof SavingsAccountType) {
-            return "SAVINGS";
-        } else if (accountType instanceof CheckingAccountType) {
-            return "CHECKING";
-        }
-        throw new IllegalArgumentException("Unknown account type");
-    }
-
 }
