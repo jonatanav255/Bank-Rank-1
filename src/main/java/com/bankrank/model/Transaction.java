@@ -10,11 +10,11 @@ public class Transaction {
     private LocalDateTime date;
     private String description;
 
-    public Transaction(TransactionType type, BigDecimal amount, String description) {
+    public Transaction(TransactionType type, BigDecimal amount, String description, LocalDateTime date) {
         this.type = type;
         this.amount = amount;
-        this.date = LocalDateTime.now();
         this.description = description;
+        this.date = date;
     }
 
     public TransactionType getTransactionType() {

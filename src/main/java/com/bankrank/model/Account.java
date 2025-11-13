@@ -29,6 +29,15 @@ public class Account {
         this.transactionHistory = new ArrayList<>();
     }
 
+    public Account(UUID AccountNumber, String CustomerName, BigDecimal InitialValue, AccountType AccountType, LocalDate dateCreated, List<Transaction> transactions) {
+        this.AccountNumber = AccountNumber;
+        this.CustomerName = CustomerName;
+        this.Balance = InitialValue;
+        this.DateCreated = dateCreated;
+        this.AccountType = AccountType;
+        this.transactionHistory = new ArrayList<>(transactions);
+    }
+
     // getters
     public UUID getAccountNumber() {
         return AccountNumber;

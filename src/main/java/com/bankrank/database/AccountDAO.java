@@ -8,20 +8,24 @@ import com.bankrank.model.Transaction;
 
 import java.math.BigDecimal;
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 // import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.bankrank.model.TransactionType;
+
 /**
- * Data Access Object for Account entity.
- * Handles all database operations related to accounts and transactions.
+ * Data Access Object for Account entity. Handles all database operations
+ * related to accounts and transactions.
  */
 public class AccountDAO {
 
     /**
-     * Saves a new account to the database along with all its transactions.
-     * Uses database transaction to ensure atomicity.
+     * Saves a new account to the database along with all its transactions. Uses
+     * database transaction to ensure atomicity.
      */
     public void save(Account account) throws SQLException {
         Connection conn = null;
@@ -30,8 +34,8 @@ public class AccountDAO {
             conn.setAutoCommit(false);  // Start transaction
 
             // Save account
-            String accountSql = "INSERT INTO accounts (id, customer_name, balance, date_created, account_type) " +
-                               "VALUES (?, ?, ?, ?, ?)";
+            String accountSql = "INSERT INTO accounts (id, customer_name, balance, date_created, account_type) "
+                    + "VALUES (?, ?, ?, ?, ?)";
 
             try (PreparedStatement stmt = conn.prepareStatement(accountSql)) {
                 stmt.setObject(1, account.getAccountNumber());
@@ -103,15 +107,15 @@ public class AccountDAO {
     public Account findById(UUID accountId) throws SQLException {
         String sql = "SELECT * FROM accounts WHERE id = ?";
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DatabaseConnection.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setObject(1, accountId);
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                Account account = mapResultSetToAccount(rs);
-                loadTransactions(conn, account);
+                List<Transaction> transactions = loadTransactions(conn, accountId);
+                Account account = mapResultSetToAccount(rs, transactions);
+
                 return account;
             }
             return null;
@@ -125,13 +129,12 @@ public class AccountDAO {
         List<Account> accounts = new ArrayList<>();
         String sql = "SELECT * FROM accounts";
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+        try (Connection conn = DatabaseConnection.getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
-                Account account = mapResultSetToAccount(rs);
-                loadTransactions(conn, account);
+                // Account account = mapResultSetToAccount(rs, );
+                List<Transaction> transactions = loadTransactions(conn, account.getAccountNumber());
+                // loadTransactions(conn, );
                 accounts.add(account);
             }
         }
@@ -172,11 +175,10 @@ public class AccountDAO {
     }
 
     // Helper methods
-
     private void saveTransactions(Connection conn, UUID accountId, List<Transaction> transactions)
             throws SQLException {
-        String sql = "INSERT INTO transactions (account_id, transaction_type, amount, description, transaction_date) " +
-                    "VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO transactions (account_id, transaction_type, amount, description, transaction_date) "
+                + "VALUES (?, ?, ?, ?, ?)";
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             for (Transaction transaction : transactions) {
@@ -199,35 +201,54 @@ public class AccountDAO {
         }
     }
 
-    private void loadTransactions(Connection conn, Account account) throws SQLException {
+    private List<Transaction> loadTransactions(Connection conn, UUID accountId) throws SQLException {
+        List<Transaction> transactions = new ArrayList<>();
+
         String sql = "SELECT * FROM transactions WHERE account_id = ? ORDER BY transaction_date";
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setObject(1, account.getAccountNumber());
-            // ResultSet rs = stmt.executeQuery();
+            stmt.setObject(1, accountId);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+
+                String typeString = rs.getString("transaction_type");
+                BigDecimal amount = rs.getBigDecimal("amount");
+                String description = rs.getString("description");
+                LocalDateTime dateTime = rs.getTimestamp("transaction_date").toLocalDateTime();
+                TransactionType type = TransactionType.valueOf(typeString);
+
+                Transaction transaction = new Transaction(type, amount, description, dateTime);
+                transactions.add(transaction);
+            }
+            return transactions;
 
             // Note: Can't directly add to account's transaction history
             // This is a design limitation - in production, you'd refactor Account class
         }
     }
 
-    private Account mapResultSetToAccount(ResultSet rs) throws SQLException {
+    private Account mapResultSetToAccount(ResultSet rs, List<Transaction> transactions) throws SQLException {
+
         UUID id = (UUID) rs.getObject("id");
         String customerName = rs.getString("customer_name");
         BigDecimal balance = rs.getBigDecimal("balance");
-        // LocalDate dateCreated = rs.getTimestamp("date_created").toLocalDateTime().toLocalDate();
+        LocalDate dateCreated = rs.getTimestamp("date_created").toLocalDateTime().toLocalDate();
         String accountTypeName = rs.getString("account_type");
 
         AccountType accountType = createAccountType(accountTypeName);
 
-        return new Account(id, customerName, balance, accountType);
+        return new Account(id, customerName, balance, accountType, dateCreated, transactions);
     }
 
     private AccountType createAccountType(String typeName) {
         return switch (typeName) {
-            case "SAVINGS" -> new SavingsAccountType();
-            case "CHECKING" -> new CheckingAccountType();
-            default -> throw new IllegalArgumentException("Unknown account type: " + typeName);
+            case "SAVINGS" ->
+                new SavingsAccountType();
+            case "CHECKING" ->
+                new CheckingAccountType();
+            default ->
+                throw new IllegalArgumentException("Unknown account type: " + typeName);
         };
     }
 
