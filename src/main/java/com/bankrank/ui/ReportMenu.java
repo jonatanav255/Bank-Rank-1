@@ -14,6 +14,7 @@ import java.util.UUID;
  */
 public class ReportMenu {
 
+    @SuppressWarnings("unused")
     private final Scanner scanner;
     private final AccountDAO accountDAO;
     private final InputHelper inputHelper;
