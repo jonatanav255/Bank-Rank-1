@@ -16,7 +16,8 @@ import java.util.UUID;
  * Handles all account-related operations (create, view, search).
  */
 public class AccountMenu {
-
+    
+    @SuppressWarnings("unused")
     private final Scanner scanner;
     private final AccountDAO accountDAO;
     private final InputHelper inputHelper;

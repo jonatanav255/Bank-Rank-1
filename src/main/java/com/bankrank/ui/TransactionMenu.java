@@ -13,6 +13,7 @@ import java.util.UUID;
  */
 public class TransactionMenu {
 
+    @SuppressWarnings("unused")
     private final Scanner scanner;
     private final AccountDAO accountDAO;
     private final InputHelper inputHelper;
