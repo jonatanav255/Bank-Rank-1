@@ -3,6 +3,7 @@ package com.bankrank.model;
 import java.math.BigDecimal;
 import java.util.UUID;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,7 +66,7 @@ public class Account {
         }
 
         this.Balance = Balance.add(amount);
-        Transaction depositTransaction = new Transaction(TransactionType.DEPOSIT, amount, "Deposit of $" + amount);
+        Transaction depositTransaction = new Transaction(TransactionType.DEPOSIT, amount, "Deposit of $" + amount, LocalDateTime.now());
         transactionHistory.add(depositTransaction);
     }
 
@@ -78,7 +79,7 @@ public class Account {
             return false;
         }
         Balance = Balance.subtract(amount);
-        Transaction withdraw = new Transaction(TransactionType.WITHDRAWAL, amount, "Withdraw $" + amount);
+        Transaction withdraw = new Transaction(TransactionType.WITHDRAWAL, amount, "Withdraw $" + amount, LocalDateTime.now());
         transactionHistory.add(withdraw);
 
         return true;
@@ -114,8 +115,8 @@ public class Account {
         this.Balance = this.Balance.subtract(amount);
         destinationAccount.Balance = destinationAccount.Balance.add(amount);
 
-        Transaction sourceTransaction = new Transaction(TransactionType.TRANSFER, amount, "transfer to " + destinationAccount.CustomerName);
-        Transaction destinationAccountTransaction = new Transaction(TransactionType.TRANSFER, amount, "Transfer from " + CustomerName);
+        Transaction sourceTransaction = new Transaction(TransactionType.TRANSFER, amount, "transfer to " + destinationAccount.CustomerName, LocalDateTime.now());
+        Transaction destinationAccountTransaction = new Transaction(TransactionType.TRANSFER, amount, "Transfer from " + CustomerName, LocalDateTime.now());
 
         transactionHistory.add(sourceTransaction);
         destinationAccount.transactionHistory.add(destinationAccountTransaction);
@@ -128,7 +129,7 @@ public class Account {
         BigDecimal interest = Balance.multiply(AccountType.getInterestRate());
         Balance = Balance.add(interest);
 
-        Transaction applyInterestTransaction = new Transaction(TransactionType.INTEREST, interest, "Interest amount " + interest);
+        Transaction applyInterestTransaction = new Transaction(TransactionType.INTEREST, interest, "Interest amount " + interest, LocalDateTime.now());
         transactionHistory.add(applyInterestTransaction);
 
         return interest;
