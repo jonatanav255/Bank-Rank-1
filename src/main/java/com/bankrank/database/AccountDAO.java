@@ -132,8 +132,11 @@ public class AccountDAO {
         try (Connection conn = DatabaseConnection.getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
+                UUID accountId = (UUID) rs.getObject("id");
                 // Account account = mapResultSetToAccount(rs, );
-                List<Transaction> transactions = loadTransactions(conn, account.getAccountNumber());
+                List<Transaction> transactions = loadTransactions(conn, accountId);
+
+                Account account  = mapResultSetToAccount(rs, transactions);
                 // loadTransactions(conn, );
                 accounts.add(account);
             }
