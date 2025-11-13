@@ -15,8 +15,8 @@ import java.util.Scanner;
 import java.util.UUID;
 
 /**
- * Console-based user interface for the banking application.
- * Provides menu-driven interaction for all banking operations.
+ * Console-based user interface for the banking application. Provides
+ * menu-driven interaction for all banking operations.
  */
 public class ConsoleMenu {
 
@@ -60,26 +60,38 @@ public class ConsoleMenu {
         System.out.println("\n═══ MAIN MENU ═══");
         System.out.println("1. Create New Account");
         System.out.println("2. View All Accounts");
-        System.out.println("3. Deposit Money");
-        System.out.println("4. Withdraw Money");
-        System.out.println("5. Transfer Money");
-        System.out.println("6. View Transaction History");
-        System.out.println("7. Apply Interest");
-        System.out.println("8. Exit");
+        System.out.println("3. View Account by ID");
+        System.out.println("4. Deposit Money");
+        System.out.println("5. Withdraw Money");
+        System.out.println("6. Transfer Money");
+        System.out.println("7. View Transaction History");
+        System.out.println("8. Apply Interest");
+        System.out.println("9. Exit");
         System.out.println("═════════════════");
     }
 
     private void handleMainMenu(int choice) {
         switch (choice) {
-            case 1 -> createAccount();
-            case 2 -> viewAllAccounts();
-            case 3 -> deposit();
-            case 4 -> withdraw();
-            case 5 -> transfer();
-            case 6 -> viewTransactionHistory();
-            case 7 -> applyInterest();
-            case 8 -> exit();
-            default -> System.out.println("Invalid choice. Please try again.");
+            case 1 ->
+                createAccount();
+            case 2 ->
+                viewAllAccounts();
+            case 3 ->
+                viewAccountById();
+            case 4 ->
+                deposit();
+            case 5 ->
+                withdraw();
+            case 6 ->
+                transfer();
+            case 7 ->
+                viewTransactionHistory();
+            case 8 ->
+                applyInterest();
+            case 9 ->
+                exit();
+            default ->
+                System.out.println("Invalid choice. Please try again.");
         }
     }
 
@@ -94,8 +106,10 @@ public class ConsoleMenu {
         int typeChoice = getIntInput("Enter choice: ");
 
         AccountType accountType = switch (typeChoice) {
-            case 1 -> new SavingsAccountType();
-            case 2 -> new CheckingAccountType();
+            case 1 ->
+                new SavingsAccountType();
+            case 2 ->
+                new CheckingAccountType();
             default -> {
                 System.out.println("Invalid account type!");
                 yield null;
@@ -160,11 +174,41 @@ public class ConsoleMenu {
         }
     }
 
+    // here
+    public void viewAccountById() {
+        System.out.println("--- View Account by ID ---");
+        // String input = getStringInput("Enter account ID: ");
+        UUID accountId = getAccountId();
+
+        if (accountId == null) {
+            System.out.println("Account not found!");
+            return;
+        }
+        try {
+            Account account = accountDAO.findById(accountId);
+            if (account != null) {
+                System.err.println(account.getAccountNumber());
+                System.err.println(account.getAccountType());
+                System.err.println(account.getBalance());
+                System.err.println(account.getCustomerName());
+                System.err.println(account.getDateCreated());
+            } else {
+                System.err.println("Account not found");
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Database error: " + e.getMessage());
+        }
+
+    }
+
     private void deposit() {
         System.out.println("\n--- Deposit Money ---");
 
         UUID accountId = getAccountId();
-        if (accountId == null) return;
+        if (accountId == null) {
+            return;
+        }
 
         try {
             Account account = accountDAO.findById(accountId);
@@ -192,7 +236,9 @@ public class ConsoleMenu {
         System.out.println("\n--- Withdraw Money ---");
 
         UUID accountId = getAccountId();
-        if (accountId == null) return;
+        if (accountId == null) {
+            return;
+        }
 
         try {
             Account account = accountDAO.findById(accountId);
@@ -228,11 +274,15 @@ public class ConsoleMenu {
 
         System.out.println("Source account:");
         UUID sourceId = getAccountId();
-        if (sourceId == null) return;
+        if (sourceId == null) {
+            return;
+        }
 
         System.out.println("Destination account:");
         UUID destId = getAccountId();
-        if (destId == null) return;
+        if (destId == null) {
+            return;
+        }
 
         try {
             Account sourceAccount = accountDAO.findById(sourceId);
@@ -268,7 +318,9 @@ public class ConsoleMenu {
         System.out.println("\n--- Transaction History ---");
 
         UUID accountId = getAccountId();
-        if (accountId == null) return;
+        if (accountId == null) {
+            return;
+        }
 
         try {
             Account account = accountDAO.findById(accountId);
@@ -310,7 +362,9 @@ public class ConsoleMenu {
         System.out.println("\n--- Apply Interest ---");
 
         UUID accountId = getAccountId();
-        if (accountId == null) return;
+        if (accountId == null) {
+            return;
+        }
 
         try {
             Account account = accountDAO.findById(accountId);
@@ -337,7 +391,6 @@ public class ConsoleMenu {
     }
 
     // Helper methods for input
-
     private String getStringInput(String prompt) {
         System.out.print(prompt);
         return scanner.nextLine().trim();
