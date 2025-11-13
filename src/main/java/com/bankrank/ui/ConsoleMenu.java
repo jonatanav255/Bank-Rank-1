@@ -185,11 +185,13 @@ public class ConsoleMenu {
         try {
             Account account = accountDAO.findById(accountId);
             if (account != null) {
-                System.out.println("\nAccount ID: " + account.getAccountNumber());
-                System.out.println("Customer: " + account.getCustomerName());
-                System.out.println("Type: " + getAccountTypeName(account.getAccountType()));
-                System.out.println("Balance: $" + account.getBalance());
-                System.out.println("Created: " + account.getDateCreated());
+                System.out.println("\n╔════════════════════════════════════════════════════════════════╗");
+                System.out.printf("║ Account ID: %-50s ║%n", account.getAccountNumber());
+                System.out.printf("║ Customer: %-53s ║%n", account.getCustomerName());
+                System.out.printf("║ Type: %-57s ║%n", getAccountTypeName(account.getAccountType()));
+                System.out.printf("║ Balance: $%-52s ║%n", account.getBalance());
+                System.out.printf("║ Created: %-54s ║%n", account.getDateCreated());
+                System.out.println("╚════════════════════════════════════════════════════════════════╝");
             } else {
                 System.out.println("Account not found!");
             }
