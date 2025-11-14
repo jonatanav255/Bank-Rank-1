@@ -5,6 +5,7 @@ import com.bankrank.model.Account;
 import com.bankrank.model.Transaction;
 
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Scanner;
 import java.util.UUID;
@@ -84,10 +85,18 @@ public class ReportMenu {
                 return;
             }
 
-            // TODO: Implement full statement generation with date ranges and file export
-            System.out.println("\n✓ Statement generation coming soon!");
-            System.out.println("Account: " + account.getCustomerName());
-            System.out.println("Balance: $" + account.getBalance());
+            LocalDate startDate = inputHelper.getDateInput();
+            LocalDate endDate = inputHelper.getDateInput();
+
+            if (startDate != null && endDate != null) {
+                if (startDate.compareTo(endDate) > 0) {
+                    System.out.println("Error: Start date cannot be after end date");
+                    return;
+                }
+            }
+
+            System.out.println("Start: " + (startDate != null ? startDate : "all history"));
+            System.out.println("End: " + (endDate != null ? endDate : "today"));
 
         } catch (SQLException e) {
             System.out.println("Database error: " + e.getMessage());
