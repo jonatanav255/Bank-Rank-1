@@ -1,6 +1,8 @@
 package com.bankrank.ui;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.Scanner;
 import java.util.UUID;
 
@@ -51,6 +53,26 @@ public class InputHelper {
         } catch (IllegalArgumentException e) {
             System.out.println("Invalid account ID format!");
             return null;
+        }
+    }
+
+    public LocalDate getDateInput() {
+        while (true) {
+            System.out.print("Enter date (YYYY-MM-DD) or press Enter to skip: ");
+            String input = scanner.nextLine().trim();
+
+            // Allow user to skip
+            if (input.isEmpty()) {
+                return null;
+            }
+
+            // Try to parse the date
+            try {
+                return LocalDate.parse(input);
+            } catch (DateTimeParseException e) {
+                System.out.println("Invalid date format. Please use YYYY-MM-DD (e.g., 2024-03-15)");
+                // Loop continues
+            }
         }
     }
 }
