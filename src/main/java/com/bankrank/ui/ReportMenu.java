@@ -111,9 +111,27 @@ public class ReportMenu {
                 if (afterStart && beforeEnd) {
                     filteredListOfTransactions.add(t);
                 }
-                System.out.println(filteredListOfTransactions);
-
             }
+
+            // Print filtered transactions
+            if (filteredListOfTransactions.isEmpty()) {
+                System.out.println("\nNo transactions found in this date range.");
+                return;
+            }
+
+            System.out.println("\nFiltered Transactions (" + filteredListOfTransactions.size() + " found):");
+            System.out.println("╔════════════════╦═════════════╦══════════════════════════════════════╗");
+            System.out.printf("║ %-14s ║ %-11s ║ %-36s ║%n", "Type", "Amount", "Description");
+            System.out.println("╠════════════════╬═════════════╬══════════════════════════════════════╣");
+
+            for (Transaction t : filteredListOfTransactions) {
+                System.out.printf("║ %-14s ║ $%-10s ║ %-36s ║%n",
+                        t.getTransactionType(),
+                        t.getAmount(),
+                        truncate(t.getDescription(), 36));
+            }
+
+            System.out.println("╚════════════════╩═════════════╩══════════════════════════════════════╝");
 
         } catch (SQLException e) {
             System.out.println("Database error: " + e.getMessage());
