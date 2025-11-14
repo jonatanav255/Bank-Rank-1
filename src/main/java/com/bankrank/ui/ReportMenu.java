@@ -6,6 +6,7 @@ import com.bankrank.model.Transaction;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.UUID;
@@ -97,6 +98,22 @@ public class ReportMenu {
 
             System.out.println("Start: " + (startDate != null ? startDate : "all history"));
             System.out.println("End: " + (endDate != null ? endDate : "today"));
+
+            List<Transaction> transactionsHistory = account.getTransactionHistory();
+            List<Transaction> filteredListOfTransactions = new ArrayList<>();
+
+            for (Transaction t : transactionsHistory) {
+
+                LocalDate txnDate = t.getDateTime().toLocalDate();
+                boolean beforeEnd = (endDate == null) || !txnDate.isAfter(endDate);
+                boolean afterStart = (startDate == null) || !txnDate.isBefore(startDate);
+
+                if (afterStart && beforeEnd) {
+                    filteredListOfTransactions.add(t);
+                }
+                System.out.println(filteredListOfTransactions);
+
+            }
 
         } catch (SQLException e) {
             System.out.println("Database error: " + e.getMessage());
