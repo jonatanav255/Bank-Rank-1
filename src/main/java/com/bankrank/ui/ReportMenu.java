@@ -159,7 +159,7 @@ public class ReportMenu {
         }
     }
 
-    private void exportToCSV(Account account, List<Transaction> transactions) {
+    private void exportToCSV(Account account, List<Transaction> filteredTransactions) {
         System.out.println("\nGenerating CSV...");
 
         // Build CSV content
@@ -169,7 +169,7 @@ public class ReportMenu {
         csv.append("Date,Type,Amount,Description\n");
 
         // Add each transaction
-        for (Transaction t : transactions) {
+        for (Transaction t : filteredTransactions) {
             csv.append(t.getDateTime().toLocalDate()).append(",");
             csv.append(t.getTransactionType()).append(",");
             csv.append(t.getAmount()).append(",");
@@ -183,7 +183,7 @@ public class ReportMenu {
             csv.append("\n");
         }
 
-        System.out.println("CSV content generated (" + transactions.size() + " transactions)");
+        System.out.println("CSV content generated (" + filteredTransactions.size() + " transactions)");
 
         // Create statements directory if it doesn't exist
         File statementsDir = new File("statements");
@@ -206,7 +206,7 @@ public class ReportMenu {
         }
     }
 
-    private void exportToText(Account account, List<Transaction> transactions, LocalDate startDate, LocalDate endDate) {
+    private void exportToText(Account account, List<Transaction> filteredTransactions, LocalDate startDate, LocalDate endDate) {
         System.out.println("\nGenerating text statement...");
 
         StringBuilder text = new StringBuilder();
@@ -229,10 +229,10 @@ public class ReportMenu {
         text.append("                            TRANSACTIONS                                   \n");
         text.append("───────────────────────────────────────────────────────────────────────────\n\n");
 
-        if (transactions.isEmpty()) {
+        if (filteredTransactions.isEmpty()) {
             text.append("No transactions found in this period.\n\n");
         } else {
-            for (Transaction t : transactions) {
+            for (Transaction t : filteredTransactions) {
                 text.append(String.format("%-12s  %-15s  $%-12s\n",
                         t.getDateTime().toLocalDate(),
                         t.getTransactionType(),
@@ -250,7 +250,7 @@ public class ReportMenu {
         java.math.BigDecimal totalWithdrawals = java.math.BigDecimal.ZERO;
         java.math.BigDecimal totalInterest = java.math.BigDecimal.ZERO;
 
-        for (Transaction t : transactions) {
+        for (Transaction t : filteredTransactions) {
             switch (t.getTransactionType()) {
                 case DEPOSIT -> totalDeposits = totalDeposits.add(t.getAmount());
                 case WITHDRAWAL -> totalWithdrawals = totalWithdrawals.add(t.getAmount());
@@ -262,13 +262,13 @@ public class ReportMenu {
         text.append("Total Deposits:    $").append(totalDeposits).append("\n");
         text.append("Total Withdrawals: $").append(totalWithdrawals).append("\n");
         text.append("Total Interest:    $").append(totalInterest).append("\n");
-        text.append("Transaction Count: ").append(transactions.size()).append("\n\n");
+        text.append("Transaction Count: ").append(filteredTransactions.size()).append("\n\n");
 
         text.append("═══════════════════════════════════════════════════════════════════════════\n");
         text.append("                       END OF STATEMENT                                    \n");
         text.append("═══════════════════════════════════════════════════════════════════════════\n");
 
-        System.out.println("Text statement generated (" + transactions.size() + " transactions)");
+        System.out.println("Text statement generated (" + filteredTransactions.size() + " transactions)");
 
         // Create statements directory
         File statementsDir = new File("statements");
@@ -291,7 +291,7 @@ public class ReportMenu {
         }
     }
 
-    private void exportToJSON(Account account, List<Transaction> transactions, LocalDate startDate, LocalDate endDate) {
+    private void exportToJSON(Account account, List<Transaction> filteredTransactions, LocalDate startDate, LocalDate endDate) {
         System.out.println("\nGenerating JSON...");
 
         // Build JSON content manually (no library needed)
@@ -303,19 +303,19 @@ public class ReportMenu {
         json.append("  \"balance\": ").append(account.getBalance()).append(",\n");
         json.append("  \"startDate\": \"").append(startDate != null ? startDate : "all history").append("\",\n");
         json.append("  \"endDate\": \"").append(endDate != null ? endDate : "today").append("\",\n");
-        json.append("  \"transactionCount\": ").append(transactions.size()).append(",\n");
+        json.append("  \"transactionCount\": ").append(filteredTransactions.size()).append(",\n");
         json.append("  \"transactions\": [\n");
 
         // Add each transaction
-        for (int i = 0; i < transactions.size(); i++) {
-            Transaction t = transactions.get(i);
+        for (int i = 0; i < filteredTransactions.size(); i++) {
+            Transaction t = filteredTransactions.get(i);
             json.append("    {\n");
             json.append("      \"date\": \"").append(t.getDateTime().toLocalDate()).append("\",\n");
             json.append("      \"type\": \"").append(t.getTransactionType()).append("\",\n");
             json.append("      \"amount\": ").append(t.getAmount()).append(",\n");
             json.append("      \"description\": \"").append(escapeJSON(t.getDescription())).append("\"\n");
             json.append("    }");
-            if (i < transactions.size() - 1) {
+            if (i < filteredTransactions.size() - 1) {
                 json.append(",");
             }
             json.append("\n");
@@ -324,7 +324,7 @@ public class ReportMenu {
         json.append("  ]\n");
         json.append("}\n");
 
-        System.out.println("JSON content generated (" + transactions.size() + " transactions)");
+        System.out.println("JSON content generated (" + filteredTransactions.size() + " transactions)");
 
         // Create statements directory if it doesn't exist
         File statementsDir = new File("statements");
