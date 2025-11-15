@@ -149,8 +149,31 @@ public class ReportMenu {
     }
 
     private void exportToCSV(Account account, List<Transaction> transactions, LocalDate startDate, LocalDate endDate) {
-        // TODO: Implement CSV export
-        System.out.println("Exporting to CSV...");
+        System.out.println("\nGenerating CSV...");
+
+        // Build CSV content
+        StringBuilder csv = new StringBuilder();
+
+        // Add header
+        csv.append("Date,Type,Amount,Description\n");
+
+        // Add each transaction
+        for (Transaction t : transactions) {
+            csv.append(t.getDateTime().toLocalDate()).append(",");
+            csv.append(t.getTransactionType()).append(",");
+            csv.append(t.getAmount()).append(",");
+            // Escape commas in description by wrapping in quotes
+            String description = t.getDescription();
+            if (description.contains(",")) {
+                csv.append("\"").append(description).append("\"");
+            } else {
+                csv.append(description);
+            }
+            csv.append("\n");
+        }
+
+        System.out.println("CSV content generated (" + transactions.size() + " transactions)");
+        // TODO: Write to file
     }
 
     private String truncate(String str, int maxLength) {
