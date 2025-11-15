@@ -4,8 +4,13 @@ import com.bankrank.database.AccountDAO;
 import com.bankrank.model.Account;
 import com.bankrank.model.Transaction;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -173,7 +178,26 @@ public class ReportMenu {
         }
 
         System.out.println("CSV content generated (" + transactions.size() + " transactions)");
-        // TODO: Write to file
+
+        // Create statements directory if it doesn't exist
+        File statementsDir = new File("statements");
+        if (!statementsDir.exists()) {
+            statementsDir.mkdir();
+        }
+
+        // Generate filename with timestamp
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String filename = "statement_" + account.getAccountNumber() + "_" + timestamp + ".csv";
+        File file = new File(statementsDir, filename);
+
+        // Write CSV to file
+        try (FileWriter writer = new FileWriter(file)) {
+            writer.write(csv.toString());
+            System.out.println("\n✓ Statement exported successfully!");
+            System.out.println("File saved to: " + file.getAbsolutePath());
+        } catch (IOException e) {
+            System.out.println("✗ Error writing file: " + e.getMessage());
+        }
     }
 
     private String truncate(String str, int maxLength) {

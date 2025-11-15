@@ -96,3 +96,4 @@ $RECYCLE.BIN/
 
 # Claude Code settings
 .claude/
+*.csv
