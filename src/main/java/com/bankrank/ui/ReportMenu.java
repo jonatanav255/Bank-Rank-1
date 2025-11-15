@@ -146,12 +146,12 @@ public class ReportMenu {
             System.out.println("4. Export to JSON file");
             int exportChoice = inputHelper.getIntInput("Enter choice: ");
 
-            if (exportChoice == 2) {
-                exportToText(account, filteredListOfTransactions, startDate, endDate);
-            } else if (exportChoice == 3) {
-                exportToCSV(account, filteredListOfTransactions, startDate, endDate);
-            } else if (exportChoice == 4) {
-                exportToJSON(account, filteredListOfTransactions, startDate, endDate);
+            switch (exportChoice) {
+                case 2 -> exportToText(account, filteredListOfTransactions, startDate, endDate);
+                case 3 -> exportToCSV(account, filteredListOfTransactions);
+                case 4 -> exportToJSON(account, filteredListOfTransactions, startDate, endDate);
+                default -> {
+                }
             }
 
         } catch (SQLException e) {
@@ -159,7 +159,7 @@ public class ReportMenu {
         }
     }
 
-    private void exportToCSV(Account account, List<Transaction> transactions, LocalDate startDate, LocalDate endDate) {
+    private void exportToCSV(Account account, List<Transaction> transactions) {
         System.out.println("\nGenerating CSV...");
 
         // Build CSV content
@@ -255,6 +255,7 @@ public class ReportMenu {
                 case DEPOSIT -> totalDeposits = totalDeposits.add(t.getAmount());
                 case WITHDRAWAL -> totalWithdrawals = totalWithdrawals.add(t.getAmount());
                 case INTEREST -> totalInterest = totalInterest.add(t.getAmount());
+                default -> throw new IllegalArgumentException("Unexpected value: " + t.getTransactionType());
             }
         }
 
