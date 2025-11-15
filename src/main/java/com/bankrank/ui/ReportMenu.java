@@ -141,13 +141,16 @@ public class ReportMenu {
             // Ask user if they want to export
             System.out.println("\nExport options:");
             System.out.println("1. Screen only (done)");
-            System.out.println("2. Export to CSV file");
-            System.out.println("3. Export to JSON file");
+            System.out.println("2. Export to Text file");
+            System.out.println("3. Export to CSV file");
+            System.out.println("4. Export to JSON file");
             int exportChoice = inputHelper.getIntInput("Enter choice: ");
 
             if (exportChoice == 2) {
-                exportToCSV(account, filteredListOfTransactions, startDate, endDate);
+                exportToText(account, filteredListOfTransactions, startDate, endDate);
             } else if (exportChoice == 3) {
+                exportToCSV(account, filteredListOfTransactions, startDate, endDate);
+            } else if (exportChoice == 4) {
                 exportToJSON(account, filteredListOfTransactions, startDate, endDate);
             }
 
@@ -196,6 +199,90 @@ public class ReportMenu {
         // Write CSV to file
         try (FileWriter writer = new FileWriter(file)) {
             writer.write(csv.toString());
+            System.out.println("\n✓ Statement exported successfully!");
+            System.out.println("File saved to: " + file.getAbsolutePath());
+        } catch (IOException e) {
+            System.out.println("✗ Error writing file: " + e.getMessage());
+        }
+    }
+
+    private void exportToText(Account account, List<Transaction> transactions, LocalDate startDate, LocalDate endDate) {
+        System.out.println("\nGenerating text statement...");
+
+        StringBuilder text = new StringBuilder();
+
+        // Header
+        text.append("═══════════════════════════════════════════════════════════════════════════\n");
+        text.append("                          BANK RANK STATEMENT                               \n");
+        text.append("═══════════════════════════════════════════════════════════════════════════\n\n");
+
+        // Account info
+        text.append("Account ID:       ").append(account.getAccountNumber()).append("\n");
+        text.append("Customer:         ").append(account.getCustomerName()).append("\n");
+        text.append("Account Type:     ").append(account.getAccountType().getClass().getSimpleName().replace("AccountType", "")).append("\n");
+        text.append("Current Balance:  $").append(account.getBalance()).append("\n");
+        text.append("Statement Period: ").append(startDate != null ? startDate : "Beginning").append(" to ").append(endDate != null ? endDate : "Today").append("\n");
+        text.append("Generated:        ").append(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))).append("\n\n");
+
+        // Transactions
+        text.append("───────────────────────────────────────────────────────────────────────────\n");
+        text.append("                            TRANSACTIONS                                   \n");
+        text.append("───────────────────────────────────────────────────────────────────────────\n\n");
+
+        if (transactions.isEmpty()) {
+            text.append("No transactions found in this period.\n\n");
+        } else {
+            for (Transaction t : transactions) {
+                text.append(String.format("%-12s  %-15s  $%-12s\n",
+                        t.getDateTime().toLocalDate(),
+                        t.getTransactionType(),
+                        t.getAmount()));
+                text.append("  ").append(t.getDescription()).append("\n\n");
+            }
+        }
+
+        // Summary
+        text.append("───────────────────────────────────────────────────────────────────────────\n");
+        text.append("                              SUMMARY                                      \n");
+        text.append("───────────────────────────────────────────────────────────────────────────\n\n");
+
+        java.math.BigDecimal totalDeposits = java.math.BigDecimal.ZERO;
+        java.math.BigDecimal totalWithdrawals = java.math.BigDecimal.ZERO;
+        java.math.BigDecimal totalInterest = java.math.BigDecimal.ZERO;
+
+        for (Transaction t : transactions) {
+            switch (t.getTransactionType()) {
+                case DEPOSIT -> totalDeposits = totalDeposits.add(t.getAmount());
+                case WITHDRAWAL -> totalWithdrawals = totalWithdrawals.add(t.getAmount());
+                case INTEREST -> totalInterest = totalInterest.add(t.getAmount());
+            }
+        }
+
+        text.append("Total Deposits:    $").append(totalDeposits).append("\n");
+        text.append("Total Withdrawals: $").append(totalWithdrawals).append("\n");
+        text.append("Total Interest:    $").append(totalInterest).append("\n");
+        text.append("Transaction Count: ").append(transactions.size()).append("\n\n");
+
+        text.append("═══════════════════════════════════════════════════════════════════════════\n");
+        text.append("                       END OF STATEMENT                                    \n");
+        text.append("═══════════════════════════════════════════════════════════════════════════\n");
+
+        System.out.println("Text statement generated (" + transactions.size() + " transactions)");
+
+        // Create statements directory
+        File statementsDir = new File("statements");
+        if (!statementsDir.exists()) {
+            statementsDir.mkdir();
+        }
+
+        // Generate filename
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String filename = "statement_" + account.getAccountNumber() + "_" + timestamp + ".txt";
+        File file = new File(statementsDir, filename);
+
+        // Write to file
+        try (FileWriter writer = new FileWriter(file)) {
+            writer.write(text.toString());
             System.out.println("\n✓ Statement exported successfully!");
             System.out.println("File saved to: " + file.getAbsolutePath());
         } catch (IOException e) {
