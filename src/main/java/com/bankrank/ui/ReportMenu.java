@@ -142,10 +142,13 @@ public class ReportMenu {
             System.out.println("\nExport options:");
             System.out.println("1. Screen only (done)");
             System.out.println("2. Export to CSV file");
+            System.out.println("3. Export to JSON file");
             int exportChoice = inputHelper.getIntInput("Enter choice: ");
 
             if (exportChoice == 2) {
                 exportToCSV(account, filteredListOfTransactions, startDate, endDate);
+            } else if (exportChoice == 3) {
+                exportToJSON(account, filteredListOfTransactions, startDate, endDate);
             }
 
         } catch (SQLException e) {
@@ -198,6 +201,67 @@ public class ReportMenu {
         } catch (IOException e) {
             System.out.println("✗ Error writing file: " + e.getMessage());
         }
+    }
+
+    private void exportToJSON(Account account, List<Transaction> transactions, LocalDate startDate, LocalDate endDate) {
+        System.out.println("\nGenerating JSON...");
+
+        // Build JSON content manually (no library needed)
+        StringBuilder json = new StringBuilder();
+
+        json.append("{\n");
+        json.append("  \"accountId\": \"").append(account.getAccountNumber()).append("\",\n");
+        json.append("  \"customerName\": \"").append(account.getCustomerName()).append("\",\n");
+        json.append("  \"balance\": ").append(account.getBalance()).append(",\n");
+        json.append("  \"startDate\": \"").append(startDate != null ? startDate : "all history").append("\",\n");
+        json.append("  \"endDate\": \"").append(endDate != null ? endDate : "today").append("\",\n");
+        json.append("  \"transactionCount\": ").append(transactions.size()).append(",\n");
+        json.append("  \"transactions\": [\n");
+
+        // Add each transaction
+        for (int i = 0; i < transactions.size(); i++) {
+            Transaction t = transactions.get(i);
+            json.append("    {\n");
+            json.append("      \"date\": \"").append(t.getDateTime().toLocalDate()).append("\",\n");
+            json.append("      \"type\": \"").append(t.getTransactionType()).append("\",\n");
+            json.append("      \"amount\": ").append(t.getAmount()).append(",\n");
+            json.append("      \"description\": \"").append(escapeJSON(t.getDescription())).append("\"\n");
+            json.append("    }");
+            if (i < transactions.size() - 1) {
+                json.append(",");
+            }
+            json.append("\n");
+        }
+
+        json.append("  ]\n");
+        json.append("}\n");
+
+        System.out.println("JSON content generated (" + transactions.size() + " transactions)");
+
+        // Create statements directory if it doesn't exist
+        File statementsDir = new File("statements");
+        if (!statementsDir.exists()) {
+            statementsDir.mkdir();
+        }
+
+        // Generate filename with timestamp
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String filename = "statement_" + account.getAccountNumber() + "_" + timestamp + ".json";
+        File file = new File(statementsDir, filename);
+
+        // Write JSON to file
+        try (FileWriter writer = new FileWriter(file)) {
+            writer.write(json.toString());
+            System.out.println("\n✓ Statement exported successfully!");
+            System.out.println("File saved to: " + file.getAbsolutePath());
+        } catch (IOException e) {
+            System.out.println("✗ Error writing file: " + e.getMessage());
+        }
+    }
+
+    private String escapeJSON(String str) {
+        // Escape quotes and backslashes for JSON
+        return str.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 
     private String truncate(String str, int maxLength) {
