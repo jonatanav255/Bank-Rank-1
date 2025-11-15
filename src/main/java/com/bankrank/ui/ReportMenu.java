@@ -133,9 +133,24 @@ public class ReportMenu {
 
             System.out.println("╚════════════════╩═════════════╩══════════════════════════════════════╝");
 
+            // Ask user if they want to export
+            System.out.println("\nExport options:");
+            System.out.println("1. Screen only (done)");
+            System.out.println("2. Export to CSV file");
+            int exportChoice = inputHelper.getIntInput("Enter choice: ");
+
+            if (exportChoice == 2) {
+                exportToCSV(account, filteredListOfTransactions, startDate, endDate);
+            }
+
         } catch (SQLException e) {
             System.out.println("Database error: " + e.getMessage());
         }
+    }
+
+    private void exportToCSV(Account account, List<Transaction> transactions, LocalDate startDate, LocalDate endDate) {
+        // TODO: Implement CSV export
+        System.out.println("Exporting to CSV...");
     }
 
     private String truncate(String str, int maxLength) {
