@@ -47,7 +47,6 @@ public class EmailService {
         return props;
     }
 
-    //   2. Create Session with SMTP settings + auth
     private Session createSession() {
         String username = emailConfig.getProperty("mail.user");
         String password = emailConfig.getProperty("mail.password");
@@ -58,8 +57,6 @@ public class EmailService {
                 return new PasswordAuthentication(username, password);
             }
         });
-
-        // return session;
     }
 
     public void sendStatementEmail(String recipientEmail, String accountNumber, File csvFile) {
@@ -151,10 +148,3 @@ public class EmailService {
         );
     }
 }
-
-//   3. Create MimeMessage
-//   4. Create Multipart
-//   5. Add text BodyPart
-//   6. Add file BodyPart
-//   7. Set multipart as message content
-//   8. Transport.send(message)
