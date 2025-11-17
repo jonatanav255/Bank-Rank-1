@@ -10,6 +10,11 @@ import javax.mail.Session;
 
 public class EmailService {
 //   1. Load email config from properties file
+    private final Properties emailConfig;
+
+    public EmailService() {
+        this.emailConfig = loadEmailConfig();
+    }
 
     private Properties loadEmailConfig() {
         Properties props = new Properties();
@@ -31,12 +36,10 @@ public class EmailService {
 
     //   2. Create Session with SMTP settings + auth
     private Session createSession() {
-        Properties props = loadEmailConfig();
+        String username = emailConfig.getProperty("mail.user");
+        String password = emailConfig.getProperty("mail.password");
 
-        String username = props.getProperty("mail.user");
-        String password = props.getProperty("mail.password");
-
-        Session session = Session.getInstance(props, new Authenticator() {
+        Session session = Session.getInstance(emailConfig, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(username, password);
@@ -48,7 +51,7 @@ public class EmailService {
 
     // Test method
     public void testLoadConfig() {
-        Properties props = loadEmailConfig();
+        Properties props = emailConfig;
 
         if (props == null) {
             System.out.println("❌ Failed to load properties");
