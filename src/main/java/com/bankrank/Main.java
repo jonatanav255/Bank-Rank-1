@@ -1,7 +1,7 @@
 package com.bankrank;
 
 import com.bankrank.service.EmailService;
-import com.bankrank.ui.ConsoleMenu;
+// import com.bankrank.ui.ConsoleMenu;
 
 public class Main {
 

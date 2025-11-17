@@ -17,7 +17,6 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
-import javax.mail.internet.MimePart;
 
 public class EmailService {
 //   1. Load email config from properties file
@@ -53,14 +52,14 @@ public class EmailService {
         String username = emailConfig.getProperty("mail.user");
         String password = emailConfig.getProperty("mail.password");
 
-        Session session = Session.getInstance(emailConfig, new Authenticator() {
+        return Session.getInstance(emailConfig, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(username, password);
             }
         });
 
-        return session;
+        // return session;
     }
 
     public void sendStatementEmail(String recipientEmail, String accountNumber, File csvFile) {
@@ -104,10 +103,9 @@ public class EmailService {
             Transport.send(message);
             System.out.println("✓ Email sent successfully to " + recipientEmail);
 
-            // Body + attachment handled in next steps (Multipart)
         } catch (MessagingException | IOException e) {  // Catch both
-            System.out.println(" Error sending email: " + e.getMessage());
-            e.printStackTrace();
+            System.out.println("Error sending email: " + e.getMessage());
+            // e.printStackTrace();
             // See full error for debugging
         }
     }
