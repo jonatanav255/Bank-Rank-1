@@ -6,6 +6,7 @@ import java.util.Properties;
 
 public class EmailService {
 //   1. Load email config from properties file
+
     private Properties loadEmailConfig() {
         Properties props = new Properties();
 
@@ -15,11 +16,28 @@ public class EmailService {
                 System.out.println("unable to find email.properties");
             }
 
+            props.load(input);
+
         } catch (IOException e) {
             System.out.println("Error loading email config: " + e.getMessage());
         }
 
         return props;
+    }
+
+    // Test method
+    public void testLoadConfig() {
+        Properties props = loadEmailConfig();
+
+        if (props == null) {
+            System.out.println("❌ Failed to load properties");
+            return;
+        }
+        System.out.println("✓ Properties loaded successfully!");
+        System.out.println("Host: " + props.getProperty("mail.smtp.host"));
+        System.out.println("Port: " + props.getProperty("mail.smtp.port"));
+        System.out.println("User: " + props.getProperty("mail.user"));
+        System.out.println("From: " + props.getProperty("mail.from"));
     }
 }
 //   2. Create Session with SMTP settings + auth
