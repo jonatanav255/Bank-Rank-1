@@ -1,19 +1,27 @@
 package com.bankrank.service;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
 import javax.mail.Authenticator;
+import javax.mail.Message;
+import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 public class EmailService {
 //   1. Load email config from properties file
+
     private final Properties emailConfig;
+    private final Session session;
 
     public EmailService() {
         this.emailConfig = loadEmailConfig();
+        this.session = createSession();
     }
 
     private Properties loadEmailConfig() {
@@ -49,6 +57,20 @@ public class EmailService {
         return session;
     }
 
+    public void sendStatementEmail(String recipientEmail, String accountNumber, File csvFile) {
+        try {
+            MimeMessage message = new MimeMessage(session);
+
+            message.setFrom(new InternetAddress(emailConfig.getProperty("mail.from")));
+            message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
+            message.setSubject("Bank Statement - Account " + accountNumber);
+
+            // Body + attachment handled in next steps (Multipart)
+        } catch (MessagingException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
     // Test method
     public void testLoadConfig() {
         Properties props = emailConfig;
@@ -65,8 +87,6 @@ public class EmailService {
     }
 
     public void testCreateSession() {
-        Session session = createSession();
-
         if (session == null) {
             System.out.println("❌ Failed to create session");
             return;
