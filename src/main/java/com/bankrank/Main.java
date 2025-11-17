@@ -10,6 +10,7 @@ public class Main {
         // menu.start();
 
         EmailService emailService = new EmailService();
-        emailService.testLoadConfig();
+        // emailService.testLoadConfig();
+        emailService.testCreateSession();
     }
 }

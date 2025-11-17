@@ -4,6 +4,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import javax.mail.Authenticator;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+
 public class EmailService {
 //   1. Load email config from properties file
 
@@ -25,6 +29,22 @@ public class EmailService {
         return props;
     }
 
+    private Session createSession() {
+        Properties props = loadEmailConfig();
+
+        String username = props.getProperty("mail.user");
+        String password = props.getProperty("mail.password");
+
+        Session session = Session.getInstance(props, new Authenticator() {
+            @Override
+            protected PasswordAuthentication getPasswordAuthentication() {
+                return new PasswordAuthentication(username, password);
+            }
+        });
+
+        return session;
+    }
+
     // Test method
     public void testLoadConfig() {
         Properties props = loadEmailConfig();
@@ -38,6 +58,19 @@ public class EmailService {
         System.out.println("Port: " + props.getProperty("mail.smtp.port"));
         System.out.println("User: " + props.getProperty("mail.user"));
         System.out.println("From: " + props.getProperty("mail.from"));
+    }
+
+    public void testCreateSession() {
+        Session session = createSession();
+
+        if (session == null) {
+            System.out.println("❌ Failed to create session");
+            return;
+        }
+
+        System.out.println("✓ Session created successfully!");
+        System.out.println("Session properties: " + session.getProperties());
+
     }
 }
 //   2. Create Session with SMTP settings + auth
