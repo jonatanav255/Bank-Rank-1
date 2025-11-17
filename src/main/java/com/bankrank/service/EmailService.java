@@ -29,6 +29,7 @@ public class EmailService {
         return props;
     }
 
+    //   2. Create Session with SMTP settings + auth
     private Session createSession() {
         Properties props = loadEmailConfig();
 
@@ -73,7 +74,7 @@ public class EmailService {
 
     }
 }
-//   2. Create Session with SMTP settings + auth
+
 //   3. Create MimeMessage
 //   4. Create Multipart
 //   5. Add text BodyPart
