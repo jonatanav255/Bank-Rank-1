@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.UUID;
 
+import com.bankrank.service.EmailService;
+
 /**
  * Handles all reporting operations (transaction history, statements).
  */
@@ -146,11 +148,26 @@ public class ReportMenu {
             System.out.println("4. Export to JSON file");
             int exportChoice = inputHelper.getIntInput("Enter choice: ");
 
+            File exportedFile = null;
+
             switch (exportChoice) {
-                case 2 -> exportToText(account, filteredListOfTransactions, startDate, endDate);
-                case 3 -> exportToCSV(account, filteredListOfTransactions);
-                case 4 -> exportToJSON(account, filteredListOfTransactions, startDate, endDate);
+                case 2 ->
+                    exportedFile = exportToText(account, filteredListOfTransactions, startDate, endDate);
+                case 3 ->
+                    exportedFile = exportToCSV(account, filteredListOfTransactions);
+                case 4 ->
+                    exportedFile = exportToJSON(account, filteredListOfTransactions, startDate, endDate);
                 default -> {
+                }
+            }
+
+            // If file was exported, ask if user wants to email it
+            if (exportedFile != null && exportedFile.exists()) {
+                String sendEmail = inputHelper.getStringInput("\nSend this file via email? (y/n): ");
+                if (sendEmail.equalsIgnoreCase("y")) {
+                    String recipientEmail = inputHelper.getStringInput("Enter recipient email: ");
+                    EmailService emailService = new EmailService();
+                    emailService.sendStatementEmail(recipientEmail, account.getAccountNumber().toString(), exportedFile);
                 }
             }
 
@@ -159,7 +176,7 @@ public class ReportMenu {
         }
     }
 
-    private void exportToCSV(Account account, List<Transaction> filteredTransactions) {
+    private File exportToCSV(Account account, List<Transaction> filteredTransactions) {
         System.out.println("\nGenerating CSV...");
 
         // Build CSV content
@@ -201,12 +218,14 @@ public class ReportMenu {
             writer.write(csv.toString());
             System.out.println("\n✓ Statement exported successfully!");
             System.out.println("File saved to: " + file.getAbsolutePath());
+            return file;
         } catch (IOException e) {
             System.out.println("✗ Error writing file: " + e.getMessage());
+            return null;
         }
     }
 
-    private void exportToText(Account account, List<Transaction> filteredTransactions, LocalDate startDate, LocalDate endDate) {
+    private File exportToText(Account account, List<Transaction> filteredTransactions, LocalDate startDate, LocalDate endDate) {
         System.out.println("\nGenerating text statement...");
 
         StringBuilder text = new StringBuilder();
@@ -252,10 +271,14 @@ public class ReportMenu {
 
         for (Transaction t : filteredTransactions) {
             switch (t.getTransactionType()) {
-                case DEPOSIT -> totalDeposits = totalDeposits.add(t.getAmount());
-                case WITHDRAWAL -> totalWithdrawals = totalWithdrawals.add(t.getAmount());
-                case INTEREST -> totalInterest = totalInterest.add(t.getAmount());
-                default -> throw new IllegalArgumentException("Unexpected value: " + t.getTransactionType());
+                case DEPOSIT ->
+                    totalDeposits = totalDeposits.add(t.getAmount());
+                case WITHDRAWAL ->
+                    totalWithdrawals = totalWithdrawals.add(t.getAmount());
+                case INTEREST ->
+                    totalInterest = totalInterest.add(t.getAmount());
+                default ->
+                    throw new IllegalArgumentException("Unexpected value: " + t.getTransactionType());
             }
         }
 
@@ -286,12 +309,14 @@ public class ReportMenu {
             writer.write(text.toString());
             System.out.println("\n✓ Statement exported successfully!");
             System.out.println("File saved to: " + file.getAbsolutePath());
+            return file;
         } catch (IOException e) {
             System.out.println("✗ Error writing file: " + e.getMessage());
+            return null;
         }
     }
 
-    private void exportToJSON(Account account, List<Transaction> filteredTransactions, LocalDate startDate, LocalDate endDate) {
+    private File exportToJSON(Account account, List<Transaction> filteredTransactions, LocalDate startDate, LocalDate endDate) {
         System.out.println("\nGenerating JSON...");
 
         // Build JSON content manually (no library needed)
@@ -342,8 +367,10 @@ public class ReportMenu {
             writer.write(json.toString());
             System.out.println("\n✓ Statement exported successfully!");
             System.out.println("File saved to: " + file.getAbsolutePath());
+            return file;
         } catch (IOException e) {
             System.out.println("✗ Error writing file: " + e.getMessage());
+            return null;
         }
     }
 
