@@ -6,12 +6,18 @@ import java.io.InputStream;
 import java.util.Properties;
 
 import javax.mail.Authenticator;
+import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
+import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.MimePart;
 
 public class EmailService {
 //   1. Load email config from properties file
@@ -58,6 +64,18 @@ public class EmailService {
     }
 
     public void sendStatementEmail(String recipientEmail, String accountNumber, File csvFile) {
+
+        // Validation
+        if (session == null) {
+            System.out.println("Email session not initialized");
+            return;
+        }
+
+        if (csvFile == null || !csvFile.exists()) {
+            System.out.println("CSV file not found");
+            return;
+        }
+
         try {
             MimeMessage message = new MimeMessage(session);
 
@@ -65,9 +83,32 @@ public class EmailService {
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
             message.setSubject("Bank Statement - Account " + accountNumber);
 
+            Multipart multipart = new MimeMultipart();
+            BodyPart textPart = new MimeBodyPart();
+            MimeBodyPart filePart = new MimeBodyPart();
+
+            textPart.setText(
+                    """
+                    Dear Customer,
+                    
+                    Please find your bank statement attached for account """ + accountNumber + ".\n\n"
+                    + "Thank you for banking with us.\n\n"
+                    + "Best regards,\n"
+                    + "Bank Rank System"
+            );
+            multipart.addBodyPart(textPart);
+            filePart.attachFile(csvFile);
+            multipart.addBodyPart(filePart);
+            message.setContent(multipart);
+
+            Transport.send(message);
+            System.out.println("✓ Email sent successfully to " + recipientEmail);
+
             // Body + attachment handled in next steps (Multipart)
-        } catch (MessagingException e) {
-            System.out.println("Error: " + e.getMessage());
+        } catch (MessagingException | IOException e) {  // Catch both
+            System.out.println(" Error sending email: " + e.getMessage());
+            e.printStackTrace();
+            // See full error for debugging
         }
     }
 
@@ -95,6 +136,21 @@ public class EmailService {
         System.out.println("✓ Session created successfully!");
         System.out.println("Session properties: " + session.getProperties());
 
+    }
+
+    public void testSendEmail() {
+        File testFile = new File("statements/test_statement.csv");
+
+        if (!testFile.exists()) {
+            System.out.println("Test file not found. Create a CSV file first.");
+            return;
+        }
+
+        sendStatementEmail(
+                "jonatanav255second@gmail.com", // Your email to receive test
+                "123456",
+                testFile
+        );
     }
 }
 

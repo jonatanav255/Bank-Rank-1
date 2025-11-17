@@ -11,6 +11,7 @@ public class Main {
 
         EmailService emailService = new EmailService();
         // emailService.testLoadConfig();
-        emailService.testCreateSession();
+        // emailService.testCreateSession();
+        emailService.testSendEmail();
     }
 }
