@@ -154,8 +154,7 @@ public class AccountDAO {
             sql.append(" AND account_type = ?");
         }
 
-        try (Connection conn = DatabaseConnection.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+        try (Connection conn = DatabaseConnection.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
 
             // Bind parameters in order
             int paramIndex = 1;

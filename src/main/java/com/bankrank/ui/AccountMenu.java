@@ -16,7 +16,7 @@ import java.util.UUID;
  * Handles all account-related operations (create, view, search).
  */
 public class AccountMenu {
-    
+
     @SuppressWarnings("unused")
     private final Scanner scanner;
     private final AccountDAO accountDAO;
@@ -169,12 +169,13 @@ public class AccountMenu {
         System.out.println("2. CHECKING");
         System.out.print("Enter choice (or press Enter to skip): ");
         String typeInput = inputHelper.getStringInput("").trim();
-
         String accountType = null;
         if (!typeInput.isEmpty()) {
             accountType = switch (typeInput) {
-                case "1" -> "SAVINGS";
-                case "2" -> "CHECKING";
+                case "1" ->
+                    "SAVINGS";
+                case "2" ->
+                    "CHECKING";
                 default -> {
                     System.out.println("Invalid type, skipping filter.");
                     yield null;
