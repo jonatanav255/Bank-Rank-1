@@ -151,4 +151,61 @@ public class AccountMenu {
         }
         throw new IllegalArgumentException("Unknown account type");
     }
+
+    public void searchAccounts() {
+        System.out.println("\n--- Search/Filter Accounts ---");
+        System.out.println("Leave fields empty to skip filter\n");
+
+        // Get customer name filter (optional)
+        System.out.print("Enter customer name (or press Enter to skip): ");
+        String customerName = inputHelper.getStringInput("").trim();
+        if (customerName.isEmpty()) {
+            customerName = null;
+        }
+
+        // Get account type filter (optional)
+        System.out.println("\nAccount type options:");
+        System.out.println("1. SAVINGS");
+        System.out.println("2. CHECKING");
+        System.out.print("Enter choice (or press Enter to skip): ");
+        String typeInput = inputHelper.getStringInput("").trim();
+
+        String accountType = null;
+        if (!typeInput.isEmpty()) {
+            accountType = switch (typeInput) {
+                case "1" -> "SAVINGS";
+                case "2" -> "CHECKING";
+                default -> {
+                    System.out.println("Invalid type, skipping filter.");
+                    yield null;
+                }
+            };
+        }
+
+        try {
+            List<Account> accounts = accountDAO.searchAccounts(customerName, accountType);
+
+            if (accounts.isEmpty()) {
+                System.out.println("\nNo accounts found matching your criteria.");
+                return;
+            }
+
+            System.out.println("\nFound " + accounts.size() + " account(s):\n");
+            System.out.println("╔════════════════════════════════════════════════════════════════════════╗");
+            System.out.printf("║ %-36s │ %-15s │ %-12s ║%n", "Account ID", "Customer", "Balance");
+            System.out.println("╠════════════════════════════════════════════════════════════════════════╣");
+
+            for (Account account : accounts) {
+                System.out.printf("║ %-36s │ %-15s │ $%-11s ║%n",
+                        account.getAccountNumber().toString().substring(0, 36),
+                        truncate(account.getCustomerName(), 15),
+                        account.getBalance());
+            }
+
+            System.out.println("╚════════════════════════════════════════════════════════════════════════╝");
+
+        } catch (SQLException e) {
+            System.out.println("Error searching accounts: " + e.getMessage());
+        }
+    }
 }

@@ -69,7 +69,8 @@ public class ConsoleMenu {
         System.out.println("7. View Transaction History");
         System.out.println("8. Apply Interest");
         System.out.println("9. Generate Account Statement");
-        System.out.println("10. Exit");
+        System.out.println("10. Search/Filter Accounts");
+        System.out.println("11. Exit");
         System.out.println("═════════════════");
     }
 
@@ -94,6 +95,8 @@ public class ConsoleMenu {
             case 9 ->
                 reportMenu.generateStatement();
             case 10 ->
+                accountMenu.searchAccounts();
+            case 11 ->
                 exit();
             default ->
                 System.out.println("Invalid choice. Please try again.");
