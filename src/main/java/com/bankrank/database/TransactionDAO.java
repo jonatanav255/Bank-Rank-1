@@ -15,7 +15,7 @@ import com.bankrank.model.TransactionType;
 
 public class TransactionDAO {
 
-    List<Transaction> searchTransactions(UUID accountId, String description, TransactionType type, BigDecimal minAmount, BigDecimal maxAmount) throws SQLException {
+    public List<Transaction> searchTransactions(UUID accountId, String description, TransactionType type, BigDecimal minAmount, BigDecimal maxAmount) throws SQLException {
         List<Transaction> searchTransactions = new ArrayList<>();
         StringBuilder sql = new StringBuilder(
                 """
@@ -46,6 +46,24 @@ public class TransactionDAO {
 
 //         PreparedStatement
         try (Connection conn = DatabaseConnection.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            // Bind parameters in order
+            int paramIndex = 1;
+            if (accountId != null) {
+                stmt.setObject(paramIndex++, accountId);
+            }
+            if (description != null && !description.trim().isEmpty()) {
+                stmt.setString(paramIndex++, "%" + description.trim() + "%");
+            }
+            if (type != null) {
+                stmt.setString(paramIndex++, type.name());
+            }
+            if (minAmount != null) {
+                stmt.setBigDecimal(paramIndex++, minAmount);
+            }
+            if (maxAmount != null) {
+                stmt.setBigDecimal(paramIndex++, maxAmount);
+            }
 
             System.out.println(stmt);
         }
