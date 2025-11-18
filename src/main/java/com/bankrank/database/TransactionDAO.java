@@ -1,11 +1,15 @@
 package com.bankrank.database;
 
 import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.bankrank.model.Account;
 import com.bankrank.model.Transaction;
 import com.bankrank.model.TransactionType;
 
@@ -36,6 +40,14 @@ public class TransactionDAO {
         }
         if (maxAmount != null) {
             sql.append(" AND t.amount <= ?");
+        }
+
+        sql.append(" ORDER BY t.transaction_date DESC");
+
+//         PreparedStatement
+        try (Connection conn = DatabaseConnection.getConnection(); PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            System.out.println(stmt);
         }
 
         return searchTransactions;
