@@ -140,6 +140,44 @@ public class AccountDAO {
         return accounts;
     }
 
+    public List<Account> searchAccounts(String customerName, String accountType) throws SQLException {
+        List<Account> accounts = new ArrayList<>();
+
+        // Build dynamic SQL
+        StringBuilder sql = new StringBuilder("SELECT * FROM accounts WHERE 1=1");
+
+        // Add filters if provided
+        if (customerName != null && !customerName.trim().isEmpty()) {
+            sql.append(" AND customer_name ILIKE ?");
+        }
+        if (accountType != null && !accountType.trim().isEmpty()) {
+            sql.append(" AND account_type = ?");
+        }
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            // Bind parameters in order
+            int paramIndex = 1;
+            if (customerName != null && !customerName.trim().isEmpty()) {
+                stmt.setString(paramIndex++, "%" + customerName.trim() + "%");
+            }
+            if (accountType != null && !accountType.trim().isEmpty()) {
+                stmt.setString(paramIndex++, accountType.trim().toUpperCase());
+            }
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                UUID accountId = (UUID) rs.getObject("id");
+                List<Transaction> transactions = loadTransactions(conn, accountId);
+                Account account = mapResultSetToAccount(rs, transactions);
+                accounts.add(account);
+            }
+        }
+        return accounts;
+    }
+
     /**
      * Deletes an account and all its transactions.
      */
