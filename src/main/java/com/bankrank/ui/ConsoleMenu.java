@@ -98,6 +98,8 @@ public class ConsoleMenu {
             case 10 ->
                 accountMenu.searchAccounts();
             case 11 ->
+                reportMenu.searchTransactions();
+            case 12 ->
                 exit();
             default ->
                 System.out.println("Invalid choice. Please try again.");
