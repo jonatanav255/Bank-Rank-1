@@ -7,6 +7,7 @@ import com.bankrank.model.Transaction;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -16,6 +17,8 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.UUID;
 
+import com.bankrank.database.TransactionDAO;
+import com.bankrank.model.TransactionType;
 import com.bankrank.service.EmailService;
 
 /**
