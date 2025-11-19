@@ -5,6 +5,7 @@ import com.bankrank.model.Account;
 import com.bankrank.model.AccountType;
 import com.bankrank.model.CheckingAccountType;
 import com.bankrank.model.SavingsAccountType;
+import com.bankrank.util.PasswordUtil;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -66,14 +67,26 @@ public class AccountMenu {
             return;
         }
 
+        // Get and confirm PIN
+        System.out.println("\nSet up a 4-digit PIN for this account:");
+        String pin = inputHelper.getPinInput("Enter PIN: ");
+        String confirmPin = inputHelper.getPinInput("Confirm PIN: ");
+
+        if (!pin.equals(confirmPin)) {
+            System.out.println("PINs do not match! Account creation cancelled.");
+            return;
+        }
+
         try {
-            // TODO: Add PIN prompting - temporarily using empty string
-            Account account = new Account(UUID.randomUUID(), customerName, initialDeposit, accountType, "");
+            // Hash the PIN before storing
+            String pinHash = PasswordUtil.hashPin(pin);
+            Account account = new Account(UUID.randomUUID(), customerName, initialDeposit, accountType, pinHash);
             accountDAO.save(account);
             System.out.println("\n✓ Account created successfully!");
             System.out.println("Account ID: " + account.getAccountNumber());
             System.out.println("Customer: " + customerName);
             System.out.println("Balance: $" + account.getBalance());
+            System.out.println("PIN: ****  (securely stored)");
         } catch (SQLException e) {
             System.out.println("Error creating account: " + e.getMessage());
         }
