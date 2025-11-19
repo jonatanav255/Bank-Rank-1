@@ -19,24 +19,31 @@ public class Account {
     private final LocalDate dateCreated;
     private final AccountType accountType;
     private final List<Transaction> transactionHistory;
+    private String pinHash;
+    private boolean isLocked;
 
-    //constructor
-    public Account(UUID accountNumber, String customerName, BigDecimal initialValue, AccountType accountType) {
+    //constructor for new accounts (with PIN)
+    public Account(UUID accountNumber, String customerName, BigDecimal initialValue, AccountType accountType, String pinHash) {
         this.accountNumber = accountNumber;
         this.customerName = customerName;
         this.balance = initialValue;
         this.dateCreated = LocalDate.now();
         this.accountType = accountType;
         this.transactionHistory = new ArrayList<>();
+        this.pinHash = pinHash;
+        this.isLocked = false;
     }
 
-    public Account(UUID accountNumber, String customerName, BigDecimal initialValue, AccountType accountType, LocalDate dateCreated, List<Transaction> transactions) {
+    //constructor for loading from database (with all fields)
+    public Account(UUID accountNumber, String customerName, BigDecimal initialValue, AccountType accountType, LocalDate dateCreated, List<Transaction> transactions, String pinHash, boolean isLocked) {
         this.accountNumber = accountNumber;
         this.customerName = customerName;
         this.balance = initialValue;
         this.dateCreated = dateCreated;
         this.accountType = accountType;
         this.transactionHistory = new ArrayList<>(transactions);
+        this.pinHash = pinHash;
+        this.isLocked = isLocked;
     }
 
     // getters
@@ -58,6 +65,22 @@ public class Account {
 
     public AccountType getAccountType() {
         return accountType;
+    }
+
+    public String getPinHash() {
+        return pinHash;
+    }
+
+    public void setPinHash(String pinHash) {
+        this.pinHash = pinHash;
+    }
+
+    public boolean isLocked() {
+        return isLocked;
+    }
+
+    public void setLocked(boolean locked) {
+        isLocked = locked;
     }
 
     public void deposit(BigDecimal amount) {
