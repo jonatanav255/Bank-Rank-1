@@ -69,6 +69,13 @@ public class TransactionMenu {
                 return;
             }
 
+            // Verify PIN before withdrawal
+            String pin = inputHelper.getPinInput("Enter PIN to authorize withdrawal: ");
+            if (!accountDAO.verifyPin(accountId, pin)) {
+                System.out.println("\n✗ Invalid PIN! Withdrawal cancelled.");
+                return;
+            }
+
             BigDecimal amount = inputHelper.getBigDecimalInput("Enter withdrawal amount: $");
 
             account.withdraw(amount);
@@ -105,6 +112,13 @@ public class TransactionMenu {
 
             if (sourceAccount == null || destAccount == null) {
                 System.out.println("One or both accounts not found!");
+                return;
+            }
+
+            // Verify PIN before transfer
+            String pin = inputHelper.getPinInput("Enter PIN to authorize transfer: ");
+            if (!accountDAO.verifyPin(sourceId, pin)) {
+                System.out.println("\n✗ Invalid PIN! Transfer cancelled.");
                 return;
             }
 
