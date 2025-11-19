@@ -67,7 +67,8 @@ public class AccountMenu {
         }
 
         try {
-            Account account = new Account(UUID.randomUUID(), customerName, initialDeposit, accountType);
+            // TODO: Add PIN prompting - temporarily using empty string
+            Account account = new Account(UUID.randomUUID(), customerName, initialDeposit, accountType, "");
             accountDAO.save(account);
             System.out.println("\n✓ Account created successfully!");
             System.out.println("Account ID: " + account.getAccountNumber());
