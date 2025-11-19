@@ -70,7 +70,8 @@ public class ConsoleMenu {
         System.out.println("8. Apply Interest");
         System.out.println("9. Generate Account Statement");
         System.out.println("10. Search/Filter Accounts");
-        System.out.println("11. Exit");
+        System.out.println("11. Search Transactions");
+        System.out.println("12. Exit");
         System.out.println("═════════════════");
     }
 
