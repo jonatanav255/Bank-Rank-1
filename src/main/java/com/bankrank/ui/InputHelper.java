@@ -75,4 +75,25 @@ public class InputHelper {
             }
         }
     }
+
+    public String getPinInput(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String pin = scanner.nextLine().trim();
+
+            // Validate: must be exactly 4 digits
+            if (pin.length() != 4) {
+                System.out.println("PIN must be exactly 4 digits!");
+                continue;
+            }
+
+            // Validate: must be numeric only
+            if (!pin.matches("\\d{4}")) {
+                System.out.println("PIN must contain only numbers!");
+                continue;
+            }
+
+            return pin;
+        }
+    }
 }
