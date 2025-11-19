@@ -385,4 +385,91 @@ public class ReportMenu {
         }
         return str.substring(0, maxLength - 3) + "...";
     }
+
+    public void searchTransactions() {
+        System.out.println("\n--- Search Transactions ---");
+        System.out.println("Leave fields empty to skip filter\n");
+
+        TransactionDAO transactionDAO = new TransactionDAO();
+
+        // Get description filter (optional)
+        System.out.print("Enter description keyword (or press Enter to skip): ");
+        String description = inputHelper.getStringInput("").trim();
+        if (description.isEmpty()) {
+            description = null;
+        }
+
+        // Get transaction type filter (optional)
+        System.out.println("\nTransaction type options:");
+        System.out.println("1. DEPOSIT");
+        System.out.println("2. WITHDRAWAL");
+        System.out.println("3. TRANSFER");
+        System.out.println("4. INTEREST");
+        System.out.print("Enter choice (or press Enter to skip): ");
+        String typeInput = inputHelper.getStringInput("").trim();
+
+        TransactionType type = null;
+        if (!typeInput.isEmpty()) {
+            type = switch (typeInput) {
+                case "1" -> TransactionType.DEPOSIT;
+                case "2" -> TransactionType.WITHDRAWAL;
+                case "3" -> TransactionType.TRANSFER;
+                case "4" -> TransactionType.INTEREST;
+                default -> {
+                    System.out.println("Invalid type, skipping filter.");
+                    yield null;
+                }
+            };
+        }
+
+        // Get amount range filters (optional)
+        System.out.print("\nEnter minimum amount (or press Enter to skip): $");
+        String minInput = inputHelper.getStringInput("").trim();
+        BigDecimal minAmount = null;
+        if (!minInput.isEmpty()) {
+            try {
+                minAmount = new BigDecimal(minInput);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid amount, skipping filter.");
+            }
+        }
+
+        System.out.print("Enter maximum amount (or press Enter to skip): $");
+        String maxInput = inputHelper.getStringInput("").trim();
+        BigDecimal maxAmount = null;
+        if (!maxInput.isEmpty()) {
+            try {
+                maxAmount = new BigDecimal(maxInput);
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid amount, skipping filter.");
+            }
+        }
+
+        try {
+            List<Transaction> transactions = transactionDAO.searchTransactions(null, description, type, minAmount, maxAmount);
+
+            if (transactions.isEmpty()) {
+                System.out.println("\nNo transactions found matching your criteria.");
+                return;
+            }
+
+            System.out.println("\nFound " + transactions.size() + " transaction(s):\n");
+            System.out.println("╔════════════════╦═════════════╦══════════════════════════════════════╦══════════════════════╗");
+            System.out.printf("║ %-14s ║ %-11s ║ %-36s ║ %-20s ║%n", "Type", "Amount", "Description", "Date");
+            System.out.println("╠════════════════╬═════════════╬══════════════════════════════════════╬══════════════════════╣");
+
+            for (Transaction t : transactions) {
+                System.out.printf("║ %-14s ║ $%-10s ║ %-36s ║ %-20s ║%n",
+                        t.getTransactionType(),
+                        t.getAmount(),
+                        truncate(t.getDescription(), 36),
+                        t.getDateTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+            }
+
+            System.out.println("╚════════════════╩═════════════╩══════════════════════════════════════╩══════════════════════╝");
+
+        } catch (SQLException e) {
+            System.out.println("Error searching transactions: " + e.getMessage());
+        }
+    }
 }
