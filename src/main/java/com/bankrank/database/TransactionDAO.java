@@ -5,11 +5,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.bankrank.model.Account;
 import com.bankrank.model.Transaction;
 import com.bankrank.model.TransactionType;
 
@@ -65,7 +65,18 @@ public class TransactionDAO {
                 stmt.setBigDecimal(paramIndex++, maxAmount);
             }
 
-            System.out.println(stmt);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                String descriptionRs = rs.getString("description");
+                BigDecimal amount = rs.getBigDecimal("amount");
+                LocalDateTime dateTime = rs.getTimestamp("transaction_date").toLocalDateTime();
+                TransactionType typeRS = TransactionType.valueOf(rs.getString("transaction_type"));
+
+                // Create Transaction object and add to list
+                Transaction transaction = new Transaction(typeRS, amount, descriptionRs, dateTime);
+                searchTransactions.add(transaction);
+            }
+
         }
 
         return searchTransactions;

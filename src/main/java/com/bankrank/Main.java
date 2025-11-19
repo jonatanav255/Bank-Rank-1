@@ -31,19 +31,24 @@ public class Main {
         try {
             // Test with no filters
             System.out.println("Test 1: No filters");
-            transactionDAO.searchTransactions(null, null, null, null, null);
+            var results1 = transactionDAO.searchTransactions(null, null, null, null, null);
+            System.out.println("Found " + results1.size() + " transactions");
 
             // Test with description
             System.out.println("\nTest 2: Description = 'deposit'");
-            transactionDAO.searchTransactions(null, "deposit", null, null, null);
+            var results2 = transactionDAO.searchTransactions(null, "deposit", null, null, null);
+            System.out.println("Found " + results2.size() + " transactions");
+            results2.forEach(t -> System.out.println("  - " + t.getDescription() + ": $" + t.getAmount()));
 
             // Test with type
             System.out.println("\nTest 3: Type = DEPOSIT");
-            transactionDAO.searchTransactions(null, null, TransactionType.DEPOSIT, null, null);
+            var results3 = transactionDAO.searchTransactions(null, null, TransactionType.DEPOSIT, null, null);
+            System.out.println("Found " + results3.size() + " transactions");
 
             // Test with amount range
             System.out.println("\nTest 4: Amount between 100 and 500");
-            transactionDAO.searchTransactions(null, null, null, new BigDecimal("100"), new BigDecimal("500"));
+            var results4 = transactionDAO.searchTransactions(null, null, null, new BigDecimal("100"), new BigDecimal("500"));
+            System.out.println("Found " + results4.size() + " transactions");
 
             System.out.println("\n✓ All tests completed!");
 
