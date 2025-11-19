@@ -33,8 +33,8 @@ public class AccountDAO {
             conn.setAutoCommit(false);  // Start transaction
 
             // Save account
-            String accountSql = "INSERT INTO accounts (id, customer_name, balance, date_created, account_type) "
-                    + "VALUES (?, ?, ?, ?, ?)";
+            String accountSql = "INSERT INTO accounts (id, customer_name, balance, date_created, account_type, pin_hash, is_locked) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?)";
 
             try (PreparedStatement stmt = conn.prepareStatement(accountSql)) {
                 stmt.setObject(1, account.getAccountNumber());
@@ -42,6 +42,8 @@ public class AccountDAO {
                 stmt.setBigDecimal(3, account.getBalance());
                 stmt.setTimestamp(4, Timestamp.valueOf(account.getDateCreated().atStartOfDay()));
                 stmt.setString(5, getAccountTypeName(account.getAccountType()));
+                stmt.setString(6, account.getPinHash());
+                stmt.setBoolean(7, account.isLocked());
                 stmt.executeUpdate();
             }
 
@@ -72,13 +74,15 @@ public class AccountDAO {
             conn.setAutoCommit(false);
 
             // Update account
-            String sql = "UPDATE accounts SET customer_name = ?, balance = ?, account_type = ? WHERE id = ?";
+            String sql = "UPDATE accounts SET customer_name = ?, balance = ?, account_type = ?, pin_hash = ?, is_locked = ? WHERE id = ?";
 
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, account.getCustomerName());
                 stmt.setBigDecimal(2, account.getBalance());
                 stmt.setString(3, getAccountTypeName(account.getAccountType()));
-                stmt.setObject(4, account.getAccountNumber());
+                stmt.setString(4, account.getPinHash());
+                stmt.setBoolean(5, account.isLocked());
+                stmt.setObject(6, account.getAccountNumber());
                 stmt.executeUpdate();
             }
 
@@ -268,10 +272,12 @@ public class AccountDAO {
         BigDecimal balance = rs.getBigDecimal("balance");
         LocalDate dateCreated = rs.getTimestamp("date_created").toLocalDateTime().toLocalDate();
         String accountTypeName = rs.getString("account_type");
+        String pinHash = rs.getString("pin_hash");
+        boolean isLocked = rs.getBoolean("is_locked");
 
         AccountType accountType = createAccountType(accountTypeName);
 
-        return new Account(id, customerName, balance, accountType, dateCreated, transactions);
+        return new Account(id, customerName, balance, accountType, dateCreated, transactions, pinHash, isLocked);
     }
 
     private AccountType createAccountType(String typeName) {
