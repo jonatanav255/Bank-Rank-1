@@ -107,6 +107,8 @@ public class ConsoleMenu {
             case 13 ->
                 accountMenu.changeCustomerName();
             case 14 ->
+                accountMenu.changePin();
+            case 15 ->
                 exit();
             default ->
                 System.out.println("Invalid choice. Please try again.");
