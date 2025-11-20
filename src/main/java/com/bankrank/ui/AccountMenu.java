@@ -270,4 +270,7 @@ public class AccountMenu {
             System.out.println("Error setting up PIN: " + e.getMessage());
         }
     }
+
+    public void changeCustomerName() {
+    }
 }

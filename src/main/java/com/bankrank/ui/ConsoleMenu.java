@@ -72,7 +72,8 @@ public class ConsoleMenu {
         System.out.println("10. Search/Filter Accounts");
         System.out.println("11. Search Transactions");
         System.out.println("12. Setup PIN for Existing Account");
-        System.out.println("13. Exit");
+        System.out.println("13. Change customer name");
+        System.out.println("14. Exit");
         System.out.println("═════════════════");
     }
 
@@ -103,6 +104,8 @@ public class ConsoleMenu {
             case 12 ->
                 accountMenu.setupPin();
             case 13 ->
+                accountMenu.changeCustomerName();
+            case 14 ->
                 exit();
             default ->
                 System.out.println("Invalid choice. Please try again.");
