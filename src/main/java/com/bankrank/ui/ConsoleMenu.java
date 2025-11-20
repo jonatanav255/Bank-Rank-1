@@ -101,6 +101,8 @@ public class ConsoleMenu {
             case 11 ->
                 reportMenu.searchTransactions();
             case 12 ->
+                accountMenu.setupPin();
+            case 13 ->
                 exit();
             default ->
                 System.out.println("Invalid choice. Please try again.");
