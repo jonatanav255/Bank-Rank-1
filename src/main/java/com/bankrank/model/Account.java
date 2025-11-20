@@ -14,7 +14,7 @@ import java.util.List;
 public class Account {
 
     private final UUID accountNumber;
-    private final String customerName;
+    private String customerName;
     private BigDecimal balance;
     private final LocalDate dateCreated;
     private final AccountType accountType;
@@ -69,6 +69,10 @@ public class Account {
 
     public String getPinHash() {
         return pinHash;
+    }
+
+    public void setCustomerName(String newCustomerName) {
+        this.customerName = newCustomerName;
     }
 
     public void setPinHash(String pinHash) {

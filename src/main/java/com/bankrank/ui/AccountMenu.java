@@ -292,6 +292,7 @@ public class AccountMenu {
                 System.out.println("PINs do not match! Account creation cancelled.");
                 return;
             }
+
             // verify pin exists on the DB
             if (!accountDAO.verifyPin(accountId, pin)) {
                 System.out.println("PIN doesn't exist.");
@@ -303,6 +304,20 @@ public class AccountMenu {
                 System.out.println(account);
             }
 
+            if (account.getPinHash() == null || account.getPinHash().isEmpty()) {
+                System.out.println("This account has no PIN! Please set up a PIN first (option 12).");
+                return;
+            }
+
+            System.out.println("CURRENT NAME" + account.getCustomerName());
+            String newCustomerName = inputHelper.getStringInput("New customer name ");
+
+            if (newCustomerName != null) {
+            account.setCustomerName(newCustomerName);
+            accountDAO.update(account);
+            }
+
+            // 853ddd6a-7b4f-4b76-a917-d8e91850db33 account ID 
             // Show old name before asking for new one (so user knows what they're changing)
             // Ask for the NEW name
             // Validate new name (not empty, reasonable length)
