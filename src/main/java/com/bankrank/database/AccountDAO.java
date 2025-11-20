@@ -335,4 +335,23 @@ public class AccountDAO {
 
         return true;
     }
+
+    /**
+     * Updates the PIN for an account.
+     *
+     * @param accountId The account UUID
+     * @param newPinHash The new hashed PIN
+     * @throws SQLException if database error occurs
+     */
+    public void changePin(UUID accountId, String newPinHash) throws SQLException {
+        String sql = "UPDATE accounts SET pin_hash = ? WHERE id = ?";
+
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, newPinHash);
+            stmt.setObject(2, accountId);
+            stmt.executeUpdate();
+        }
+    }
 }
