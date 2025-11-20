@@ -25,7 +25,7 @@ public class Account {
     //constructor for new accounts (with PIN)
     public Account(UUID accountNumber, String customerName, BigDecimal initialValue, AccountType accountType, String pinHash) {
         this.accountNumber = accountNumber;
-        this.customerName = customerName;
+        setCustomerName(customerName); // Use setter for validation
         this.balance = initialValue;
         this.dateCreated = LocalDate.now();
         this.accountType = accountType;
@@ -37,7 +37,7 @@ public class Account {
     //constructor for loading from database (with all fields)
     public Account(UUID accountNumber, String customerName, BigDecimal initialValue, AccountType accountType, LocalDate dateCreated, List<Transaction> transactions, String pinHash, boolean isLocked) {
         this.accountNumber = accountNumber;
-        this.customerName = customerName;
+        setCustomerName(customerName); // Use setter for validation
         this.balance = initialValue;
         this.dateCreated = dateCreated;
         this.accountType = accountType;
@@ -71,8 +71,23 @@ public class Account {
         return pinHash;
     }
 
-    public void setCustomerName(String newCustomerName) {
-        this.customerName = newCustomerName;
+    public final void setCustomerName(String newCustomerName) {
+        // Validation 1: Cannot be null or empty
+        if (newCustomerName == null || newCustomerName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Customer name cannot be empty");
+        }
+
+        // Validation 2: Length check (reasonable limit)
+        if (newCustomerName.trim().length() > 100) {
+            throw new IllegalArgumentException("Customer name too long (max 100 characters)");
+        }
+
+        // Validation 3: Only letters, spaces, hyphens, apostrophes
+        if (!newCustomerName.matches("^[a-zA-Z\\s'-]+$")) {
+            throw new IllegalArgumentException("Customer name can only contain letters, spaces, hyphens, and apostrophes");
+        }
+
+        this.customerName = newCustomerName.trim();
     }
 
     public void setPinHash(String pinHash) {
