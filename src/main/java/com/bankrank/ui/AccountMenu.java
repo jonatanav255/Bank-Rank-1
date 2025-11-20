@@ -272,59 +272,54 @@ public class AccountMenu {
     }
 
     public void changeCustomerName() {
+        System.out.println("\n--- Change Customer Name ---");
 
-        System.out.println("\n--- Change the name of a customer account's name ---");
-
-        // ask for the ID
         UUID accountId = inputHelper.getAccountId();
-        // check that ID exists
         if (accountId == null) {
             return;
         }
-        // here
+
         try {
-            // ask for the PIN
-            // Check that PIN matches
-            String pin = inputHelper.getPinInput("Enter PIN: ");
-            String confirmPin = inputHelper.getPinInput("Confirm PIN: ");
-
-            if (!pin.equals(confirmPin)) {
-                System.out.println("PINs do not match! Account creation cancelled.");
-                return;
-            }
-
-            // verify pin exists on the DB
-            if (!accountDAO.verifyPin(accountId, pin)) {
-                System.out.println("PIN doesn't exist.");
-                return;
-            }
-
+            // 1. Load account FIRST
             Account account = accountDAO.findById(accountId);
-            if (account != null) {
-                System.out.println(account);
+            if (account == null) {
+                System.out.println("Account not found!");
+                return;
             }
 
+            // 2. Check if has PIN
             if (account.getPinHash() == null || account.getPinHash().isEmpty()) {
                 System.out.println("This account has no PIN! Please set up a PIN first (option 12).");
                 return;
             }
 
-            System.out.println("CURRENT NAME" + account.getCustomerName());
-            String newCustomerName = inputHelper.getStringInput("New customer name ");
-
-            if (newCustomerName != null) {
-            account.setCustomerName(newCustomerName);
-            accountDAO.update(account);
+            // 3. Verify PIN (only ONCE, no confirm)
+            String pin = inputHelper.getPinInput("Enter PIN to authorize: ");
+            if (!accountDAO.verifyPin(accountId, pin)) {
+                System.out.println("\n✗ Invalid PIN!");
+                return;
             }
 
-            // 853ddd6a-7b4f-4b76-a917-d8e91850db33 account ID 
-            // Show old name before asking for new one (so user knows what they're changing)
-            // Ask for the NEW name
-            // Validate new name (not empty, reasonable length)
-            // Update the database
-            // Show confirmation - Display success message with old and new names- Where: At the end
-        } catch (SQLException e) {
-        }
+            // 4. Show old name
+            String oldName = account.getCustomerName();
+            System.out.println("\nCurrent name: " + oldName);
 
+            // 5. Get new name
+            String newName = inputHelper.getStringInput("Enter new name: ");
+
+            // 6. Update (validation happens in setter)
+            account.setCustomerName(newName);
+            accountDAO.update(account);
+
+            // 7. Confirm
+            System.out.println("\n✓ Name changed successfully!");
+            System.out.println("Old name: " + oldName);
+            System.out.println("New name: " + account.getCustomerName());
+
+        } catch (IllegalArgumentException e) {
+            System.out.println("\n✗ Invalid name: " + e.getMessage());
+        } catch (SQLException e) {
+            System.out.println("Database error: " + e.getMessage());
+        }
     }
 }
