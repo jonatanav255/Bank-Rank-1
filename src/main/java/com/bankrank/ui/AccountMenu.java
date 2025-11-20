@@ -322,4 +322,62 @@ public class AccountMenu {
             System.out.println("Database error: " + e.getMessage());
         }
     }
+
+    public void changePin() {
+        System.out.println("\n--- Change PIN ---");
+
+        UUID accountId = inputHelper.getAccountId();
+        if (accountId == null) {
+            return;
+        }
+
+        try {
+            // 1. Load account
+            Account account = accountDAO.findById(accountId);
+            if (account == null) {
+                System.out.println("Account not found!");
+                return;
+            }
+
+            // 2. Check if has PIN
+            if (account.getPinHash() == null || account.getPinHash().isEmpty()) {
+                System.out.println("This account has no PIN! Please set up a PIN first (option 12).");
+                return;
+            }
+
+            // 3. Verify old PIN
+            String oldPin = inputHelper.getPinInput("Enter current PIN: ");
+            if (!accountDAO.verifyPin(accountId, oldPin)) {
+                System.out.println("\n✗ Invalid PIN!");
+                return;
+            }
+
+            // 4. Get new PIN with confirmation
+            System.out.println("\nEnter new PIN:");
+            String newPin = inputHelper.getPinInput("New PIN: ");
+            String confirmPin = inputHelper.getPinInput("Confirm new PIN: ");
+
+            if (!newPin.equals(confirmPin)) {
+                System.out.println("PINs do not match! Change cancelled.");
+                return;
+            }
+
+            // 5. Check if new PIN is same as old
+            if (PasswordUtil.verifyPin(newPin, account.getPinHash())) {
+                System.out.println("\n✗ New PIN must be different from current PIN!");
+                return;
+            }
+
+            // 6. Hash and save new PIN
+            String newPinHash = PasswordUtil.hashPin(newPin);
+            accountDAO.changePin(accountId, newPinHash);
+
+            System.out.println("\n✓ PIN changed successfully!");
+            System.out.println("Account: " + account.getCustomerName());
+            System.out.println("Account ID: " + account.getAccountNumber());
+
+        } catch (SQLException e) {
+            System.out.println("Database error: " + e.getMessage());
+        }
+    }
 }
