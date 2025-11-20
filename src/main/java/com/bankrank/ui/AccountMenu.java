@@ -223,4 +223,51 @@ public class AccountMenu {
             System.out.println("Error searching accounts: " + e.getMessage());
         }
     }
+
+    public void setupPin() {
+        System.out.println("\n--- Setup PIN for Existing Account ---");
+
+        UUID accountId = inputHelper.getAccountId();
+        if (accountId == null) {
+            return;
+        }
+
+        try {
+            Account account = accountDAO.findById(accountId);
+            if (account == null) {
+                System.out.println("Account not found!");
+                return;
+            }
+
+            // Check if account already has a PIN
+            if (account.getPinHash() != null && !account.getPinHash().isEmpty()) {
+                System.out.println("\n⚠ This account already has a PIN!");
+                System.out.println("Use 'Change PIN' feature instead (if available).");
+                return;
+            }
+
+            // Get and confirm new PIN
+            System.out.println("\nSet up a 4-digit PIN for this account:");
+            String pin = inputHelper.getPinInput("Enter PIN: ");
+            String confirmPin = inputHelper.getPinInput("Confirm PIN: ");
+
+            if (!pin.equals(confirmPin)) {
+                System.out.println("PINs do not match! Setup cancelled.");
+                return;
+            }
+
+            // Hash and save PIN
+            String pinHash = PasswordUtil.hashPin(pin);
+            account.setPinHash(pinHash);
+            accountDAO.update(account);
+
+            System.out.println("\n✓ PIN setup successful!");
+            System.out.println("Account: " + account.getCustomerName());
+            System.out.println("Account ID: " + account.getAccountNumber());
+            System.out.println("PIN: ****  (securely stored)");
+
+        } catch (SQLException e) {
+            System.out.println("Error setting up PIN: " + e.getMessage());
+        }
+    }
 }
