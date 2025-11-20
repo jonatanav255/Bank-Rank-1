@@ -272,5 +272,44 @@ public class AccountMenu {
     }
 
     public void changeCustomerName() {
+
+        System.out.println("\n--- Change the name of a customer account's name ---");
+
+        // ask for the ID
+        UUID accountId = inputHelper.getAccountId();
+        // check that ID exists
+        if (accountId == null) {
+            return;
+        }
+        // here
+        try {
+            // ask for the PIN
+            // Check that PIN matches
+            String pin = inputHelper.getPinInput("Enter PIN: ");
+            String confirmPin = inputHelper.getPinInput("Confirm PIN: ");
+
+            if (!pin.equals(confirmPin)) {
+                System.out.println("PINs do not match! Account creation cancelled.");
+                return;
+            }
+            // verify pin exists on the DB
+            if (!accountDAO.verifyPin(accountId, pin)) {
+                System.out.println("PIN doesn't exist.");
+                return;
+            }
+
+            Account account = accountDAO.findById(accountId);
+            if (account != null) {
+                System.out.println(account);
+            }
+
+            // Show old name before asking for new one (so user knows what they're changing)
+            // Ask for the NEW name
+            // Validate new name (not empty, reasonable length)
+            // Update the database
+            // Show confirmation - Display success message with old and new names- Where: At the end
+        } catch (SQLException e) {
+        }
+
     }
 }
