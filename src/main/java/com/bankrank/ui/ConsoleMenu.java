@@ -1,7 +1,10 @@
 package com.bankrank.ui;
 
+import com.bankrank.auth.AuthenticationService;
 import com.bankrank.database.AccountDAO;
 import com.bankrank.database.DatabaseConnection;
+import com.bankrank.database.UserDAO;
+import com.bankrank.model.User;
 
 import java.util.Scanner;
 
@@ -12,6 +15,8 @@ public class ConsoleMenu {
 
     private final Scanner scanner;
     private final AccountDAO accountDAO;
+    private final UserDAO userDAO;
+    private final AuthenticationService authService;
     private final InputHelper inputHelper;
     private boolean running;
 
@@ -19,10 +24,13 @@ public class ConsoleMenu {
     private final AccountMenu accountMenu;
     private final TransactionMenu transactionMenu;
     private final ReportMenu reportMenu;
+    private final LoginMenu loginMenu;
 
     public ConsoleMenu() {
         this.scanner = new Scanner(System.in);
         this.accountDAO = new AccountDAO();
+        this.userDAO = new UserDAO();
+        this.authService = new AuthenticationService(userDAO);
         this.inputHelper = new InputHelper(scanner);
         this.running = true;
 
@@ -30,6 +38,7 @@ public class ConsoleMenu {
         this.accountMenu = new AccountMenu(scanner, accountDAO);
         this.transactionMenu = new TransactionMenu(scanner, accountDAO);
         this.reportMenu = new ReportMenu(scanner, accountDAO);
+        this.loginMenu = new LoginMenu(scanner, authService);
     }
 
     /**
@@ -48,6 +57,14 @@ public class ConsoleMenu {
         System.out.println("║   Welcome to Bank Rank System!    ║");
         System.out.println("╚════════════════════════════════════╝\n");
 
+        // Login required before accessing menu
+        if (!loginMenu.showLogin()) {
+            System.out.println("\nExiting...");
+            scanner.close();
+            return;
+        }
+
+        // Main menu loop (after successful login)
         while (running) {
             showMainMenu();
             int choice = inputHelper.getIntInput("Enter choice: ");
@@ -59,7 +76,11 @@ public class ConsoleMenu {
     }
 
     private void showMainMenu() {
+        User currentUser = authService.getCurrentUser();
+
         System.out.println("\n═══ MAIN MENU ═══");
+        System.out.println("Logged in as: " + currentUser.getFullName() + " (" + currentUser.getRole() + ")");
+        System.out.println("─────────────────");
         System.out.println("1. Create New Account");
         System.out.println("2. View All Accounts");
         System.out.println("3. View Account by ID");
@@ -74,7 +95,8 @@ public class ConsoleMenu {
         System.out.println("12. Setup PIN for Existing Account");
         System.out.println("13. Change Customer Name");
         System.out.println("14. Change PIN");
-        System.out.println("15. Exit");
+        System.out.println("15. Logout");
+        System.out.println("16. Exit");
         System.out.println("═════════════════");
     }
 
@@ -109,13 +131,25 @@ public class ConsoleMenu {
             case 14 ->
                 accountMenu.changePin();
             case 15 ->
+                logout();
+            case 16 ->
                 exit();
             default ->
                 System.out.println("Invalid choice. Please try again.");
         }
     }
 
+    private void logout() {
+        if (loginMenu.confirmLogout()) {
+            authService.logout();
+            System.out.println("\n✓ Logged out successfully!");
+            System.out.println("\nExiting...");
+            running = false;
+        }
+    }
+
     private void exit() {
+        authService.logout();
         System.out.println("\nExiting...");
         running = false;
     }
